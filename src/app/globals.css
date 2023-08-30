@@ -86,13 +86,7 @@ body {
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  background-color: rgb(40,40,40);
 }
 
 a {
@@ -104,4 +98,12 @@ a {
   html {
     color-scheme: dark;
   }
+}
+
+
+.d-flex {
+  display: flex;
+}
+.justify-content-between {
+  justify-content: space-between;
 }

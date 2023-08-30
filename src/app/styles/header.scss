@@ -1,0 +1,38 @@
+
+$color: #fff;
+
+.logo {
+    color: $color;
+    margin: 20px;
+    font-size: 20px;
+}
+
+
+.nav-bar {
+    display: flex;
+    margin: 10px;
+    margin-right: 50px;
+    justify-content: space-between;
+    background-color: rgba(0,0,0,0.3);
+    border-radius: 4;
+
+}
+
+.nav-item {
+    margin-left: 4px;
+    margin-right: 4px;
+    font-size: 18px;
+    width: 180px;
+    padding: 15px;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    border-radius: 4;
+    transition: background-color 0.1s;
+    color: white;
+    cursor: pointer;
+}
+
+.nav-item:hover {
+    background-color: rgba(0,0,0,0.1);
+}
