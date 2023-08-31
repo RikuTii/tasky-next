@@ -2,6 +2,8 @@
 import { useSession } from "next-auth/react";
 import "./globals.css";
 import styles from './page.module.css'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCoffee } from "@fortawesome/free-solid-svg-icons";
 
 
 export default function Home() {

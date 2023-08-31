@@ -69,12 +69,16 @@ export const authOptions: NextAuthOptions = {
           ),
         });
 
-        const u = await res.json();
+        if(res.status !== 200) {
+          return null;
+        }
 
+        const u = await res.json();
+        console.log(u);
         const user = {
           name: u.userName,
           email: u.email,
-          access_token: u.access_token, // <-- retrive JWT token from Drupal response
+          id: u.id
         };
         if (user) {
           return user;
@@ -91,7 +95,7 @@ export const authOptions: NextAuthOptions = {
       if(user) {
         token.email = user.email;
         token.username = user.userName;
-        token.accessToken = user.access_token;
+        token.id = user.id;
       }
       return token
     },
@@ -100,7 +104,7 @@ export const authOptions: NextAuthOptions = {
       if (token) {
         session.user.email = token.email;
         session.user.username = token.userName;
-        session.user.accessToken = token.accessToken;
+        session.user.id = token.id;
       }
       return session
     }

@@ -5,6 +5,7 @@ import { Button, Form } from "react-bootstrap";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn, signOut, useSession } from "next-auth/react";
+import Loader from "@/components/loader";
 
 const LoginPage = () => {
   const router = useRouter();
@@ -18,10 +19,16 @@ const LoginPage = () => {
     await signIn("credentials", {
       email: email,
       password: password,
+      redirect: false,
+      redirectUrl: "/dashboard",
     })
-      .then(() => {
+      .then((response) => {
         setLoading(false);
-        router.push("/dashboard");
+        if (response?.error === "CredentialsSignin") {
+          setValidationErrors({ invalid_login: true });
+        } else {
+          router.push("/dashboard");
+        }
       })
       .catch((e) => {
         console.log(e);
@@ -75,12 +82,12 @@ const LoginPage = () => {
             onChange={(e) => setValidationErrors(null)}
           />
         </Form.Group>
-        <Form.Group className="mb-3" controlId="formBasicCheckbox">
-          <Form.Check type="checkbox" name="check" label="Remember me" />
-        </Form.Group>
-        <Button variant="primary" type="submit">
-          Login
-        </Button>
+        <div className="d-flex justify-content-end">
+          <Button variant="primary" type="submit" size="lg">
+            Login
+            {loading && <Loader />}
+          </Button>
+        </div>
       </Form>
     </div>
   );

@@ -3,12 +3,23 @@ import Link from "next/link";
 import "../../styles/header.scss";
 import "./../../globals.css";
 import { useSession, signIn, signOut } from "next-auth/react";
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { fas } from '@fortawesome/free-solid-svg-icons'
+import { far } from '@fortawesome/free-regular-svg-icons'
+
+
+library.add(fas,far)
+
+
 const Header = () => {
   const { data: session, status } = useSession();
 
-  /*if (status === "authenticated") {
-    return <p>yes</p>;
-  }*/
+  const signUserOut = async () => {
+    const result = await signOut({
+      redirect: true,
+      callbackUrl: "/"
+    });
+  }
 
   return (
     <div
@@ -23,7 +34,7 @@ const Header = () => {
         <Link href="/auth/register">
           <div className="nav-item">Manage tasklists</div>
         </Link>
-        <Link href="/auth/register">
+        <Link href="/tasklist/create">
           <div className="nav-item">New tasklist</div>
         </Link>
         {status === "authenticated" && (
@@ -32,29 +43,22 @@ const Header = () => {
         <Link href="/auth/register">
           <div className="nav-item">Register</div>
         </Link>
-        {/* <Link href="/api/auth/signin">
-          <div className="nav-item">Login</div>
-        </Link> */}
-
         {status === "authenticated" && (
           <div
-          className="nav-item c-pointer"
-          onClick={(e) => {
-            e.preventDefault();
-            signOut();
-          }}
-        >
-          Sign out
-        </div>
+            className="nav-item"
+            onClick={(e) => {
+              e.preventDefault();
+              signUserOut();
+            }}
+          >
+            Sign out
+          </div>
         )}
-         {status !== "authenticated" && (
-             <Link href="/auth/login">
-
-          <div className="nav-item">Sign in</div>
-
-        </Link>
+        {status !== "authenticated" && (
+          <Link href="/auth/login">
+            <div className="nav-item">Sign in</div>
+          </Link>
         )}
-
       </div>
     </div>
   );

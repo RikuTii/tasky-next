@@ -13,7 +13,8 @@ declare module "next-auth/jwt" {
 declare module "next-auth" {
   interface User {
     role?: Role;
-    subscribed: boolean;
+    userName?: string;
+    id?: number;
   }
 
   interface Session extends DefaultSession {
