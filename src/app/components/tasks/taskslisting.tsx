@@ -17,6 +17,8 @@ import {
   MediaQuery,
   Button,
   Box,
+  rem,
+  TextInput,
 } from "@mantine/core";
 import debounce from "lodash/debounce";
 import { forEach } from "lodash";
@@ -28,8 +30,7 @@ import {
   faPlus,
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
-import { List, arrayMove } from 'react-movable';
-
+import { List, arrayMove } from "react-movable";
 
 const hideElement: CSSObject = {
   display: "none",
@@ -70,8 +71,6 @@ const TasksListing = ({}) => {
     });
   };
 
-
-
   useEffect(() => {
     setTasks(currentTaskList?.tasks);
   }, [currentTaskList]);
@@ -94,7 +93,7 @@ const TasksListing = ({}) => {
       creator: session?.user?.id,
       status: TaskStatus.NotCreated,
       taskList: currentTaskList,
-      taskListID: currentTaskList?.id,
+      taskListId: currentTaskList?.id,
     };
     if (tasks) {
       const newTasks = [...tasks];
@@ -115,12 +114,12 @@ const TasksListing = ({}) => {
         title: task?.title,
         id: task?.id,
         status: task?.status,
-        taskListId: task?.taskListID ?? task?.taskList?.id,
+        taskListId: task?.taskListId ?? task?.taskList?.id,
         order_task: orderId ?? 0,
       }),
     })
       .then(() => {
-        refreshTaskLists(task?.taskListID ?? task?.taskList?.id ?? 0);
+        refreshTaskLists(task?.taskListId ?? task?.taskList?.id ?? 0);
       })
       .catch((err) => {
         console.log(err.message);
@@ -132,11 +131,11 @@ const TasksListing = ({}) => {
       method: "POST",
       body: JSON.stringify({
         id: task?.id,
-        taskListId: task?.taskListID ?? task?.taskList?.id,
+        taskListId: task?.taskListId ?? task?.taskList?.id,
       }),
     })
       .then(() => {
-        refreshTaskLists(task?.taskListID ?? task?.taskList?.id ?? 0);
+        refreshTaskLists(task?.taskListId ?? task?.taskList?.id ?? 0);
       })
       .catch((err) => {
         console.log(err.message);
@@ -159,7 +158,7 @@ const TasksListing = ({}) => {
       .then(() => {
         if (orderedTasks)
           refreshTaskLists(
-            orderedTasks[0]?.taskListID ?? orderedTasks[0]?.taskList?.id ?? 0
+            orderedTasks[0]?.taskListId ?? orderedTasks[0]?.taskList?.id ?? 0
           );
       })
       .catch((err) => {
@@ -190,9 +189,9 @@ const TasksListing = ({}) => {
 
   const renderSingleTask = (task: Task) => {
     return (
-      <Flex key={task.id} direction="row" gap="md" sx={{marginBottom: 8}}>
+      <Flex key={task.id} direction="row" gap="md" sx={{ marginBottom: 8, alignItems: 'center' }}>
         <FontAwesomeIcon icon={faList} color="white" size="1x" />
-        <input
+        <TextInput
           type="textarea"
           placeholder=""
           value={task.title}
@@ -261,11 +260,19 @@ const TasksListing = ({}) => {
       <Flex direction={"row"}>
         <MediaQuery smallerThan="sm" styles={hideElement}>
           <Box>
-            <Container size="xs">
+            <Container
+              size="xs"
+              sx={(theme) => ({
+                borderRightColor: theme.colors.dark[4],
+                borderRightWidth: rem(2),
+                borderRightStyle: "solid",
+              })}
+            >
+            <Text fz="lg">Tasklists</Text>
               {taskLists?.map((tasklist: Tasklist) => {
                 return (
                   <NavLink
-                    key={'nav'+tasklist.id}
+                    key={"nav" + tasklist.id}
                     label={tasklist.name}
                     active={tasklist.id === currentTaskList?.id}
                     onClick={(e) => setCurrentTaskList(tasklist)}
@@ -295,12 +302,20 @@ const TasksListing = ({}) => {
               />
             </MediaQuery>
 
-            {tasks &&  <List
-              values={tasks}
-              onChange={onDragEnd}
-              renderList={({ children, props }) => <div {...props}>{children}</div>}
-              renderItem={({ value, props }) => <div key={value.id+String(Math.random())}>{renderSingleTask(value)}</div>}
-            />}
+            {tasks && (
+              <List
+                values={tasks}
+                onChange={onDragEnd}
+                renderList={({ children, props }) => (
+                  <div {...props}>{children}</div>
+                )}
+                renderItem={({ value, props }) => (
+                  <div>
+                    {renderSingleTask(value)}
+                  </div>
+                )}
+              />
+            )}
 
             <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
               <Button

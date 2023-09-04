@@ -1,9 +1,16 @@
+import { User } from "./global";
+
+export type TaskListMeta = {
+  userAccount: User;
+  tasklistId?: number;
+  creatorId?: number;
+};
 export type Tasklist = {
     id?: number;
     name?: string;
     createdDate?: string;
-    creator?: any;
-    taskListMetas?: any;
+    creator?: User;
+    taskListMetas?: TaskListMeta[];
     tasks?: Task[];
   };
   
@@ -14,7 +21,7 @@ export type Task = {
     creator?: any;
     taskList?: Tasklist;
     status?: number;
-    taskListID?: number;
+    taskListId?: number;
 };
 
 export enum TaskStatus

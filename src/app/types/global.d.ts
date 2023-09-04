@@ -1,12 +1,6 @@
-
-
-export const toastProperties = {
-    position: "bottom-center",
-    autoClose: 5000,
-    hideProgressBar: false,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-    progress: 0,
-    theme: "dark",
-  };
+export type User = {
+  username: string;
+  email: string;
+  id: number;
+  firstName: string;
+};

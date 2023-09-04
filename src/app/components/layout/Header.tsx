@@ -71,8 +71,6 @@ const HeaderMenu = () => {
   const { data: session, status } = useSession();
   const [showMenu, setShowMenu] = useState(false);
 
-  
-
   const signUserOut = async () => {
     const result = await signOut({
       redirect: true,
@@ -81,7 +79,7 @@ const HeaderMenu = () => {
   };
 
   return (
-    <Header height={HEADER_HEIGHT} mb={120}>
+    <Header height={HEADER_HEIGHT} mb={70}>
       <Group position="apart">
         <Link href="/">
           <div className="logo">Tasky</div>
@@ -129,7 +127,14 @@ const HeaderMenu = () => {
 
         {showMenu && (
           <Box sx={{ position: "absolute", right: 25, top: 55 }}>
-            <Box sx={(theme) => ({ background: theme.colors.dark[5], display: "flex", flexDirection: 'column', borderRadius: 6 })}>
+            <Box
+              sx={(theme) => ({
+                background: theme.colors.dark[5],
+                display: "flex",
+                flexDirection: "column",
+                borderRadius: 6,
+              })}
+            >
               <Link href="/tasklist/manage">
                 <div className={classes.link}>Manage tasklists</div>
               </Link>

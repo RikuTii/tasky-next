@@ -1,19 +1,36 @@
-"use client"
+"use client";
 import React, { useEffect, useState, useContext } from "react";
-import { Box, Button, Grid, Group, Modal, Table } from "@mantine/core";
-import { Tasklist } from "../../types/tasks";
+import {
+  Box,
+  Button,
+  Flex,
+  Grid,
+  Group,
+  Modal,
+  Table,
+  Text,
+  TextInput,
+  Title,
+  rem,
+} from "@mantine/core";
+import { TaskListMeta, Tasklist } from "../../types/tasks";
 import { useSession } from "next-auth/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faShareNodes, faTrash, faXmark } from "@fortawesome/free-solid-svg-icons";
+import {
+  faShareNodes,
+  faTrash,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
 import { notifications } from "@mantine/notifications";
-import {useDisclosure} from "@mantine/hooks"
-
+import { useDisclosure } from "@mantine/hooks";
 
 const TaskLists = ({}) => {
   const { data: session, status } = useSession();
   const [tasklists, setTaskLists] = useState<Tasklist[] | null>(null);
   const [shareList, setShareList] = useState<Tasklist | null>(null);
-  const [opened, { open, close }] = useDisclosure(false);
+  const [opened, { open, close }] = useDisclosure(false, {
+    onClose: () => setShareEmail(""),
+  });
   const [shareEmail, setShareEmail] = useState<string>("");
 
   const loadTaskLists = async () => {
@@ -100,7 +117,7 @@ const TaskLists = ({}) => {
               <td className="text-light">{tasklist.name}</td>
               <td className="text-light">{tasklist.createdDate}</td>
               <td className="text-light">
-                {tasklist.creator ? tasklist.creator.firstName : 0}
+                {tasklist.creator ? tasklist.creator.username : 0}
               </td>
               <td className="text-light">
                 <div
@@ -112,10 +129,7 @@ const TaskLists = ({}) => {
                 >
                   {tasklist.creator &&
                     tasklist.creator.id == session?.user?.id && (
-                      <FontAwesomeIcon
-                        icon={faShareNodes}
-                        size="2xl"
-                      />
+                      <FontAwesomeIcon icon={faShareNodes} size="2xl" />
                     )}
                 </div>
               </td>
@@ -125,11 +139,7 @@ const TaskLists = ({}) => {
                 >
                   {tasklist.creator &&
                     tasklist.creator.id == session?.user?.id && (
-                      <FontAwesomeIcon
-                        icon={faTrash}
-                        color="red"
-                        size="2xl"
-                      />
+                      <FontAwesomeIcon icon={faTrash} color="red" size="2xl" />
                     )}
                 </div>
               </td>
@@ -139,69 +149,73 @@ const TaskLists = ({}) => {
       </Table>
 
       <Modal opened={opened} onClose={close} centered title="Share tasklist">
-        <Box sx={(theme) => ({
-          backgroundColor: theme.colors.dark[6]
-        })}>
-          <h3>Shared users</h3>
-          <div>
-            <p>{shareList?.name}</p>
+        <Box
+          sx={(theme) => ({
+            backgroundColor: theme.colors.dark[6],
+            padding: rem(8),
+          })}
+        >
+          <Box>
+            <Title order={3}>{shareList?.name}</Title>
             {shareList &&
               shareList.taskListMetas &&
-              shareList?.taskListMetas.map((meta: any) => {
+              shareList?.taskListMetas.map((meta: TaskListMeta) => {
                 return (
-                  <Grid key={meta.userAccount.email}>
-                    <Grid.Col>
-                      <span style={{ fontWeight: "bold" }}>
-                        {meta.userAccount.firstName}
-                      </span>{" "}
-                      <span>{meta.userAccount.email}</span>
-                    </Grid.Col>
-
-                    <Grid.Col>
-                      <div
-                        onClick={() => {
-                          removeTaskListShare(meta.userAccount.email);
-                        }}
-                      >
-                        <FontAwesomeIcon
-                          icon={faXmark}
-                          color="black"
-                          size="2x"
-                        />
-                      </div>
-                    </Grid.Col>
-                  </Grid>
+                  <Flex
+                    key={meta.userAccount.email}
+                    gap="sm"
+                    sx={{ alignItems: "center" }}
+                  >
+                    <Text fw={700}>
+                      {meta.userAccount.username}
+                    </Text>{" "}
+                    <Text>{meta.userAccount.email}</Text>
+                    <a
+                      onClick={() => {
+                        removeTaskListShare(meta.userAccount.email);
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faXmark} color="black" size="2x" />
+                    </a>
+                  </Flex>
                 );
               })}
-          </div>
+          </Box>
           <Grid>
             <Grid.Col>
-              <p>Email</p>
-              <input
+              <Text>Email</Text>
+              <TextInput
                 type="email"
                 value={shareEmail}
                 onChange={(event) => {
                   setShareEmail(event.target.value);
                 }}
-              ></input>
-              <Button
-                sx={{ marginLeft: 8 }}
-                variant="outline"
-                onClick={() => {
-                  setShareEmail("");
-                  shareTaskList();
-                }}
-              >
-                Share
-              </Button>
+              />
+            </Grid.Col>
+            <Grid.Col>
+              <Group position="right">
+                <Button
+                  sx={{ marginLeft: 8 }}
+                  variant="outline"
+                  onClick={() => {
+                    setShareEmail("");
+                    shareTaskList();
+                  }}
+                >
+                  Share
+                </Button>
+              </Group>
             </Grid.Col>
           </Grid>
         </Box>
-        <Group position="right">
-          <Button variant="outline" onClick={close}>
-            Close
-          </Button>
-        </Group>
+
+        <Box sx={{ marginTop: rem(30) }}>
+          <Group position="right">
+            <Button variant="outline" onClick={close}>
+              Close
+            </Button>
+          </Group>
+        </Box>
       </Modal>
     </div>
   );
