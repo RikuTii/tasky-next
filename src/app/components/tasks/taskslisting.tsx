@@ -1,16 +1,43 @@
 "use client";
+import "./../../globals.css";
 import React, { useEffect, useState, useContext, useCallback } from "react";
 import "react-toastify/dist/ReactToastify.css";
-import { Tasklist, Task, TaskStatus } from "@/types/tasks";
-import { Container, Stack } from "react-bootstrap";
+import { Tasklist, Task, TaskStatus } from "@/types/tasks.d";
+import {
+  Container,
+  Flex,
+  Select,
+  Loader,
+  Center,
+  SimpleGrid,
+  Text,
+  Title,
+  Grid,
+  NavLink,
+  CSSObject,
+  MediaQuery,
+  Button,
+  Box,
+} from "@mantine/core";
 import debounce from "lodash/debounce";
-import Dropdown from "react-bootstrap/Dropdown";
-import DropdownButton from "react-bootstrap/DropdownButton";
 import { forEach } from "lodash";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 import { useSession } from "next-auth/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faCheck,
+  faList,
+  faPlus,
+  faTrash,
+} from "@fortawesome/free-solid-svg-icons";
+import { SortableContainer, SortableElement } from "react-sortable-hoc";
 
+const hideElement: CSSObject = {
+  display: "none",
+};
+
+const showElement: CSSObject = {
+  display: "flex",
+};
 
 const TasksListing = ({}) => {
   const { data: session, status } = useSession();
@@ -18,20 +45,22 @@ const TasksListing = ({}) => {
   const [currentTaskList, setCurrentTaskList] = useState<Tasklist>();
   const [taskLists, setTaskLists] = useState<Tasklist[]>();
   const [tasks, setTasks] = useState<Array<Task>>();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadTaskLists();
   }, []);
 
   const loadTaskLists = async () => {
-    const response = await fetch("api/fetch/tasks/Index");
+    const response = await fetch("/api/fetch/tasklist/Index");
     const data = await response.json();
     setCurrentTaskList(data[0]);
+    setLoading(false);
     setTaskLists(data);
   };
 
   const refreshTaskLists = async (id: number) => {
-    const response = await fetch("api/fetch/tasks/Index");
+    const response = await fetch("/api/fetch/tasklist/Index");
     const data = await response.json();
     setTaskLists(data);
     forEach(data, (taskList: Tasklist) => {
@@ -40,6 +69,20 @@ const TasksListing = ({}) => {
       }
     });
   };
+
+  const SortableItem = SortableElement<any>(({ value }: any) => (
+    <div>{renderSingleTask(value)}</div>
+  ));
+
+  const SortableList = SortableContainer<any>(({ items }: any) => {
+    return (
+      <div>
+        {items.map((value: any, index: number) => (
+          <SortableItem key={`item-${value.id}`} index={index} value={value} />
+        ))}
+      </div>
+    );
+  });
 
   useEffect(() => {
     setTasks(currentTaskList?.tasks);
@@ -78,7 +121,7 @@ const TasksListing = ({}) => {
   );
 
   const onTaskUpdated = async (task: Task, orderId: number = 0) => {
-    fetch("api/fetch/task/CreateOrUpdateTask", {
+    fetch("/api/fetch/task/CreateOrUpdateTask", {
       method: "POST",
       body: JSON.stringify({
         title: task?.title,
@@ -97,7 +140,7 @@ const TasksListing = ({}) => {
   };
 
   const removeTask = async (task: Task) => {
-    fetch("api/fetch/task/RemoveTask", {
+    fetch("/api/fetch/task/RemoveTask", {
       method: "POST",
       body: JSON.stringify({
         id: task?.id,
@@ -118,7 +161,7 @@ const TasksListing = ({}) => {
   const filteredTasks = pendingTasks?.concat(doneTasks ?? []);
 
   const reOrderTasks = async (orderedTasks: Task[]) => {
-    fetch("api/fetch/task/ReOrderTasks", {
+    fetch("/api/fetch/task/ReOrderTasks", {
       method: "POST",
       body: JSON.stringify({
         taskListId: currentTaskList?.id,
@@ -149,15 +192,7 @@ const TasksListing = ({}) => {
   };
 
   const onDragEnd = (result: any) => {
-    if (!result.destination) {
-      return;
-    }
-
-    const items: Task[] = reorder(
-      tasks,
-      result.source.index,
-      result.destination.index
-    );
+    const items: Task[] = reorder(tasks, result.oldIndex, result.newIndex);
 
     if (items) {
       reOrderTasks(items);
@@ -167,8 +202,8 @@ const TasksListing = ({}) => {
 
   const renderSingleTask = (task: Task) => {
     return (
-      <Stack key={task.id} direction="horizontal" gap={3}>
-        <FontAwesomeIcon icon={["fas", "list"]} color="white" size="1x" />
+      <Flex key={task.id} direction="row" gap="md">
+        <FontAwesomeIcon icon={faList} color="white" size="1x" />
         <input
           type="textarea"
           placeholder=""
@@ -210,74 +245,83 @@ const TasksListing = ({}) => {
         >
           {task.status === TaskStatus.Done && (
             <div style={{ marginLeft: 4, marginRight: 8 }}>
-              <FontAwesomeIcon
-                icon={["fas", "check"]}
-                color="white"
-                size="1x"
-              />
+              <FontAwesomeIcon icon={faCheck} color="white" size="1x" />
             </div>
           )}
         </div>
         <div onClick={() => removeTask(task)}>
-          <FontAwesomeIcon icon={["fas", "trash"]} color="red" size="xl" />
+          <FontAwesomeIcon icon={faTrash} color="red" size="xl" />
         </div>
-      </Stack>
+      </Flex>
     );
   };
 
+  if (loading) {
+    return (
+      <Center maw={400} h={100} mx="auto">
+        <Loader />
+      </Center>
+    );
+  }
+
   return (
-    <Container>
-      <h1>Current Tasks</h1>
-      <h2>{currentTaskList?.name}</h2>
-      <DropdownButton
-        id="dropdown-basic-button"
-        title="Tasklists"
-        style={{ marginBottom: 8 }}
-      >
-        {taskLists?.map((taskList: Tasklist) => (
-          <Dropdown.Item
-            key={taskList.id}
-            onClick={() => {
-              setCurrentTaskList(taskList);
-            }}
-          >
-            {taskList.name}
-          </Dropdown.Item>
-        ))}
-      </DropdownButton>
+    <Box sx={{ margin: 10 }}>
+      <Title order={1} sx={{ marginBottom: 8 }}>
+        Current Tasks
+      </Title>
 
-      <DragDropContext onDragEnd={onDragEnd}>
-        <Droppable droppableId="droppable">
-          {(provided, snapshot) => (
-            <div {...provided.droppableProps} ref={provided.innerRef}>
-              {tasks?.map((task: Task, index: number) => (
-                <Draggable
-                  key={"task" + task.id + task.taskListID}
-                  draggableId={String(task.id)}
-                  index={index}
-                >
-                  {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                    >
-                      {renderSingleTask(task)}
-                    </div>
-                  )}
-                </Draggable>
-              ))}
-            </div>
-          )}
-        </Droppable>
-      </DragDropContext>
+      <Flex direction={"row"}>
+        <MediaQuery smallerThan="sm" styles={hideElement}>
+          <Box>
+            <Container size="xs">
+              {taskLists?.map((tasklist: Tasklist) => {
+                return (
+                  <NavLink
+                    label={tasklist.name}
+                    active={tasklist.id === currentTaskList?.id}
+                    onClick={(e) => setCurrentTaskList(tasklist)}
+                  />
+                );
+              })}
+            </Container>
+          </Box>
+        </MediaQuery>
 
-      <div style={{ position: "absolute", top: "50%", left: "30%" }}>
-        <div onClick={createNewTask}>
-        <span className="fa-solid share-nodes"></span>
-        </div>
-      </div>
-    </Container>
+        <Box>
+          <Container size="md">
+            <MediaQuery largerThan="xs" styles={hideElement}>
+              <Select
+                label="Tasklists"
+                style={{ marginBottom: 8 }}
+                value={String(currentTaskList?.id)}
+                data={
+                  taskLists?.map((tasklist: Tasklist) => ({
+                    value: String(tasklist.id),
+                    label: tasklist.name ?? "",
+                  })) ?? []
+                }
+                onChange={(e) =>
+                  setCurrentTaskList(taskLists?.find((t) => t.id === Number(e)))
+                }
+              />
+            </MediaQuery>
+
+            {tasks && <SortableList items={tasks} onSortEnd={onDragEnd} />}
+
+            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+              <Button
+                sx={{ marginTop: 8 }}
+                variant="gradient"
+                gradient={{ from: "indigo", to: "cyan" }}
+                onClick={createNewTask}
+              >
+                New
+              </Button>
+            </Box>
+          </Container>
+        </Box>
+      </Flex>
+    </Box>
   );
 };
 

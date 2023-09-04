@@ -10,6 +10,7 @@ import { Tasklist } from "../../types/tasks";
 import "../Styles/Styles.css";
 import { useSession } from "next-auth/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faShareNodes, faTrash, faXmark } from "@fortawesome/free-solid-svg-icons";
 
 const TaskLists = ({}) => {
   const { data: session, status } = useSession();
@@ -115,7 +116,7 @@ const TaskLists = ({}) => {
                   {tasklist.creator &&
                     tasklist.creator.id == session?.user?.id && (
                       <FontAwesomeIcon
-                        icon={["fas", "share-nodes"]}
+                        icon={faShareNodes}
                         size="2xl"
                       />
                     )}
@@ -128,7 +129,7 @@ const TaskLists = ({}) => {
                   {tasklist.creator &&
                     tasklist.creator.id == session?.user?.id && (
                       <FontAwesomeIcon
-                        icon={["fas", "trash"]}
+                        icon={faTrash}
                         color="red"
                         size="2xl"
                       />
@@ -167,7 +168,7 @@ const TaskLists = ({}) => {
                         }}
                       >
                         <FontAwesomeIcon
-                          icon={["fas", "xmark"]}
+                          icon={faXmark}
                           color="black"
                           size="2x"
                         />

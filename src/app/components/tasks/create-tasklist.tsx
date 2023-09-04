@@ -6,14 +6,14 @@ import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import { ToastOptions, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { toastProperties } from "../../types/global";
+import { toastProperties } from "@/types/global.d";
 
 const CreateTaskList = ({}) => {
   const [tasklist, setTaskList] = useState();
   const [newlist, setNewList] = useState({ name: "", description: "" });
 
   const createTaskList = async () => {
-    await fetch("/api/fetch/Tasklist/CreateTaskList", {
+    await fetch("/api/fetch/tasklist/CreateTaskList", {
       method: "POST",
       body: JSON.stringify({
         Name: newlist?.name,

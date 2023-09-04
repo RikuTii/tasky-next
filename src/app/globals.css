@@ -101,6 +101,12 @@ a {
 }
 
 
+h1 {
+  color: white;
+}
+h2 {
+  color: white;
+}
 .d-flex {
   display: flex;
 }
@@ -109,4 +115,8 @@ a {
 }
 .justify-content-end {
   justify-content: flex-end;
+}
+
+.hide {
+  display: none;
 }
