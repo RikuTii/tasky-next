@@ -1,9 +1,7 @@
+import { notifications } from "@mantine/notifications";
 import React, { useEffect, useState } from "react";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
-import { ToastOptions, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { toastProperties } from "@/types/global.d";
 
 
 const CreateTask = ({}) => {
@@ -31,7 +29,10 @@ const CreateTask = ({}) => {
       })
     })
       .then(() => {
-        toast("Created new task: " + newTask?.name, toastProperties);
+        notifications.show({
+          title: "Task created",
+          message: newTask?.name,
+        });
         setNewTask({ name: "", description: "", listId: 0 });
       })
       .catch((err) => {

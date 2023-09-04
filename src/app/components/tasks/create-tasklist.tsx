@@ -1,75 +1,66 @@
-"use client"
-import React, { useEffect, useState, useContext } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
+"use client";
+import React, { useState } from "react";
 import "./../../globals.css";
-import Button from "react-bootstrap/Button";
-import Form from "react-bootstrap/Form";
-import { ToastOptions, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { toastProperties } from "@/types/global.d";
+import { useForm } from "@mantine/form";
+import { Box, Group, TextInput, Button } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
+
+interface TaskForm {
+  name: string;
+  description: string;
+}
 
 const CreateTaskList = ({}) => {
-  const [tasklist, setTaskList] = useState();
-  const [newlist, setNewList] = useState({ name: "", description: "" });
+  const form = useForm<TaskForm>({
+    initialValues: { name: "", description: "" },
+    validate: {
+      name: (value) =>
+        value.length < 2 ? "Name must have at least 2 letters" : null,
+    },
+  });
 
-  const createTaskList = async () => {
+  const createTaskList = async (values: TaskForm) => {
     await fetch("/api/fetch/tasklist/CreateTaskList", {
       method: "POST",
       body: JSON.stringify({
-        Name: newlist?.name,
-        Description: newlist?.description,
-      })
+        Name: values.name,
+        Description: values.description,
+      }),
     })
       .then(() => {
-        toast("Created new tasklist: " + newlist?.name, toastProperties);
-        setNewList({ name: "", description: "" });
+        notifications.show({
+          title: "Tasklist created",
+          message: values.name + "🤥",
+        });
+        form.reset();
       })
       .catch((err) => {
         console.log(err.message);
       });
-    //const data = await response.json();
-    //this.setState({ forecasts: data, loading: false });
   };
 
   return (
     <div>
       <h1>Create new tasklist</h1>
-      <Form>
-        <Form.Group className="mb-3" controlId="formName">
-          <Form.Label>Name</Form.Label>
-          <Form.Control
-            type="text"
+      <Box maw={340} mx="auto">
+        <form onSubmit={form.onSubmit((values) => createTaskList(values))}>
+          <TextInput
+            sx={{ marginBottom: 8 }}
+            label="Name"
             placeholder="Name"
-            value={newlist.name}
-            onChange={(event) => {
-              const data = {
-                name: event.target.value,
-                description: newlist.description,
-              };
-              setNewList(data);
-            }}
+            {...form.getInputProps("name")}
           />
-        </Form.Group>
-
-        <Form.Group className="mb-3" controlId="formDescription">
-          <Form.Label>Description</Form.Label>
-          <Form.Control
-            type="textarea"
+          <TextInput
+            label="Description"
             placeholder="Description"
-            value={newlist.description}
-            onChange={(event) => {
-              const data = {
-                name: newlist.name,
-                description: event.target.value,
-              };
-              setNewList(data);
-            }}
+            {...form.getInputProps("description")}
           />
-        </Form.Group>
-        <Button variant="primary" type="button" onClick={createTaskList}>
-          Create new tasklist
-        </Button>
-      </Form>
+
+          <Group position="right" mt="md">
+            <Button type="submit">Submit</Button>
+          </Group>
+        </form>
+      </Box>
     </div>
   );
 };

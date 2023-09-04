@@ -1,7 +1,6 @@
 "use client";
 import "./../../globals.css";
 import React, { useEffect, useState, useContext, useCallback } from "react";
-import "react-toastify/dist/ReactToastify.css";
 import { Tasklist, Task, TaskStatus } from "@/types/tasks.d";
 import {
   Container,
@@ -29,7 +28,8 @@ import {
   faPlus,
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
-import { SortableContainer, SortableElement } from "react-sortable-hoc";
+import { List, arrayMove } from 'react-movable';
+
 
 const hideElement: CSSObject = {
   display: "none",
@@ -70,19 +70,7 @@ const TasksListing = ({}) => {
     });
   };
 
-  const SortableItem = SortableElement<any>(({ value }: any) => (
-    <div>{renderSingleTask(value)}</div>
-  ));
 
-  const SortableList = SortableContainer<any>(({ items }: any) => {
-    return (
-      <div>
-        {items.map((value: any, index: number) => (
-          <SortableItem key={`item-${value.id}`} index={index} value={value} />
-        ))}
-      </div>
-    );
-  });
 
   useEffect(() => {
     setTasks(currentTaskList?.tasks);
@@ -202,7 +190,7 @@ const TasksListing = ({}) => {
 
   const renderSingleTask = (task: Task) => {
     return (
-      <Flex key={task.id} direction="row" gap="md">
+      <Flex key={task.id} direction="row" gap="md" sx={{marginBottom: 8}}>
         <FontAwesomeIcon icon={faList} color="white" size="1x" />
         <input
           type="textarea"
@@ -277,6 +265,7 @@ const TasksListing = ({}) => {
               {taskLists?.map((tasklist: Tasklist) => {
                 return (
                   <NavLink
+                    key={'nav'+tasklist.id}
                     label={tasklist.name}
                     active={tasklist.id === currentTaskList?.id}
                     onClick={(e) => setCurrentTaskList(tasklist)}
@@ -289,7 +278,7 @@ const TasksListing = ({}) => {
 
         <Box>
           <Container size="md">
-            <MediaQuery largerThan="xs" styles={hideElement}>
+            <MediaQuery largerThan="sm" styles={hideElement}>
               <Select
                 label="Tasklists"
                 style={{ marginBottom: 8 }}
@@ -306,7 +295,12 @@ const TasksListing = ({}) => {
               />
             </MediaQuery>
 
-            {tasks && <SortableList items={tasks} onSortEnd={onDragEnd} />}
+            {tasks &&  <List
+              values={tasks}
+              onChange={onDragEnd}
+              renderList={({ children, props }) => <div {...props}>{children}</div>}
+              renderItem={({ value, props }) => <div key={value.id+String(Math.random())}>{renderSingleTask(value)}</div>}
+            />}
 
             <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
               <Button

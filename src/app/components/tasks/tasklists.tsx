@@ -1,26 +1,23 @@
+"use client"
 import React, { useEffect, useState, useContext } from "react";
-import { ToastOptions, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { Table } from "react-bootstrap";
-import Modal from "react-bootstrap/Modal";
-import Button from "react-bootstrap/Button";
-import { Col, Container, Row } from "react-bootstrap";
-import { toastProperties } from "../../types/global";
+import { Box, Button, Grid, Group, Modal, Table } from "@mantine/core";
 import { Tasklist } from "../../types/tasks";
-import "../Styles/Styles.css";
 import { useSession } from "next-auth/react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faShareNodes, faTrash, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { notifications } from "@mantine/notifications";
+import {useDisclosure} from "@mantine/hooks"
+
 
 const TaskLists = ({}) => {
   const { data: session, status } = useSession();
   const [tasklists, setTaskLists] = useState<Tasklist[] | null>(null);
   const [shareList, setShareList] = useState<Tasklist | null>(null);
-  const [showShareModal, setShowShareModal] = useState(false);
+  const [opened, { open, close }] = useDisclosure(false);
   const [shareEmail, setShareEmail] = useState<string>("");
 
   const loadTaskLists = async () => {
-    const response = await fetch("api/fetch/tasklist/Index");
+    const response = await fetch("/api/fetch/tasklist/Index");
     const data = await response.json();
     setTaskLists(data);
 
@@ -34,7 +31,7 @@ const TaskLists = ({}) => {
   };
 
   const shareTaskList = async () => {
-    fetch("api/fetch/tasklist/ShareTaskList", {
+    fetch("/api/fetch/tasklist/ShareTaskList", {
       method: "POST",
       body: JSON.stringify({
         id: shareList?.id,
@@ -43,14 +40,17 @@ const TaskLists = ({}) => {
     })
       .then(() => {
         loadTaskLists();
-        toast("Shared list to " + shareEmail, toastProperties);
+        notifications.show({
+          title: "Tasklist shared",
+          message: "Tasklist shared to " + shareEmail,
+        });
       })
       .catch((err) => {
         console.log(err.message);
       });
   };
   const removeTaskListShare = async (email: string) => {
-    fetch("api/fetch/tasklist/RemoveShareTaskList", {
+    fetch("/api/fetch/tasklist/RemoveShareTaskList", {
       method: "POST",
       body: JSON.stringify({
         id: shareList?.id,
@@ -59,18 +59,15 @@ const TaskLists = ({}) => {
     })
       .then(() => {
         loadTaskLists();
-        toast("Removed sharing from " + email, toastProperties);
+        notifications.show({
+          title: "Tasklist sharing removed",
+          message: "Sharing to " + email + " removed",
+        });
       })
       .catch((err) => {
         console.log(err.message);
       });
   };
-
-  const handleClose = () => {
-    setShowShareModal(false);
-    loadTaskLists();
-  };
-  const handleOpen = () => setShowShareModal(true);
 
   useEffect(() => {
     loadTaskLists();
@@ -87,7 +84,7 @@ const TaskLists = ({}) => {
   return (
     <div>
       <h1>Manage tasklists</h1>
-      <Table striped bordered hover>
+      <Table striped highlightOnHover withBorder withColumnBorders>
         <thead>
           <tr>
             <th className="text-light">Title</th>
@@ -110,7 +107,7 @@ const TaskLists = ({}) => {
                   style={{ alignContent: "center", justifyContent: "center" }}
                   onClick={() => {
                     setShareList(tasklist);
-                    handleOpen();
+                    open();
                   }}
                 >
                   {tasklist.creator &&
@@ -141,11 +138,10 @@ const TaskLists = ({}) => {
         </tbody>
       </Table>
 
-      <Modal show={showShareModal} onHide={handleClose}>
-        <Modal.Header closeButton className="primary-background">
-          <Modal.Title>Share tasklist</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="primary-background">
+      <Modal opened={opened} onClose={close} centered title="Share tasklist">
+        <Box sx={(theme) => ({
+          backgroundColor: theme.colors.dark[6]
+        })}>
           <h3>Shared users</h3>
           <div>
             <p>{shareList?.name}</p>
@@ -153,15 +149,15 @@ const TaskLists = ({}) => {
               shareList.taskListMetas &&
               shareList?.taskListMetas.map((meta: any) => {
                 return (
-                  <Row key={meta.userAccount.email}>
-                    <Col>
+                  <Grid key={meta.userAccount.email}>
+                    <Grid.Col>
                       <span style={{ fontWeight: "bold" }}>
                         {meta.userAccount.firstName}
                       </span>{" "}
                       <span>{meta.userAccount.email}</span>
-                    </Col>
+                    </Grid.Col>
 
-                    <Col>
+                    <Grid.Col>
                       <div
                         onClick={() => {
                           removeTaskListShare(meta.userAccount.email);
@@ -173,13 +169,13 @@ const TaskLists = ({}) => {
                           size="2x"
                         />
                       </div>
-                    </Col>
-                  </Row>
+                    </Grid.Col>
+                  </Grid>
                 );
               })}
           </div>
-          <Row>
-            <Col>
+          <Grid>
+            <Grid.Col>
               <p>Email</p>
               <input
                 type="email"
@@ -189,8 +185,8 @@ const TaskLists = ({}) => {
                 }}
               ></input>
               <Button
-                style={{ marginLeft: 8 }}
-                variant="primary"
+                sx={{ marginLeft: 8 }}
+                variant="outline"
                 onClick={() => {
                   setShareEmail("");
                   shareTaskList();
@@ -198,14 +194,14 @@ const TaskLists = ({}) => {
               >
                 Share
               </Button>
-            </Col>
-          </Row>
-        </Modal.Body>
-        <Modal.Footer className="primary-background">
-          <Button variant="secondary" onClick={handleClose}>
+            </Grid.Col>
+          </Grid>
+        </Box>
+        <Group position="right">
+          <Button variant="outline" onClick={close}>
             Close
           </Button>
-        </Modal.Footer>
+        </Group>
       </Modal>
     </div>
   );

@@ -4,11 +4,21 @@ import "./globals.css";
 import styles from './page.module.css'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCoffee } from "@fortawesome/free-solid-svg-icons";
+import { Loader, Center } from "@mantine/core";
+import TasksListing from "./components/tasks/taskslisting";
 
 
 export default function Home() {
 
   const { data: session, status } = useSession()
+
+  if(status === "loading") {
+    return <Center><Loader/></Center>
+  }
+
+  if(status === "authenticated") {
+    return <TasksListing/>
+  }
 
   return (
     <main className={styles.main}>

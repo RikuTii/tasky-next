@@ -1,6 +1,6 @@
-import { ToastOptions } from "react-toastify";
 
-export const toastProperties: ToastOptions = {
+
+export const toastProperties = {
     position: "bottom-center",
     autoClose: 5000,
     hideProgressBar: false,
