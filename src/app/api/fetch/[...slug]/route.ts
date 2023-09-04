@@ -36,8 +36,6 @@ export async function POST(
   const path = params.slug.join('/');
   const body = await req.text();
 
-  console.log('writing to', process.env.API_URL + path);
-
   if (token !== null) {
     const signedToken = jwt.sign(token, process.env.NEXTAUTH_SECRET ?? "key", {
       algorithm: "HS256",

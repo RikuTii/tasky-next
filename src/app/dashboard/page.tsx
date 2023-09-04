@@ -1,17 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import { authFetch } from "../helpers/auth-fetch";
 
 const Dashboard = () => {
-  async function submitLogin() {
-    const data = await fetch("api/fetch/SecureData");
-    const json = await data.json();
-    console.log(json);
-  }
-
-  useEffect(() => {
-    submitLogin();
-  }, []);
 
   return (
     <main>

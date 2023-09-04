@@ -17,7 +17,7 @@ export default function Home() {
   }
 
   if(status === "authenticated") {
-    return <TasksListing/>
+    return <Center><TasksListing/></Center>
   }
 
   return (

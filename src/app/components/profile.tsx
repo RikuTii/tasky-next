@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import "@/globals.css";
 import { useForm } from "@mantine/form";
-import { Box, Group, TextInput, Button, Center, Loader } from "@mantine/core";
+import { Box, Group, TextInput, Button, Center, Loader, Title } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { method } from "lodash";
 import { useDisclosure } from "@mantine/hooks";
@@ -70,7 +70,7 @@ const Profile = ({}) => {
 
   return (
     <div>
-      <h1>Update profile information</h1>
+      <Title order={2}>Update profile information</Title>
       <Box maw={340} mx="auto">
         <form onSubmit={form.onSubmit((values) => updateProfile(values))}>
           <TextInput

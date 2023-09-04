@@ -261,11 +261,14 @@ const TasksListing = ({}) => {
         <MediaQuery smallerThan="sm" styles={hideElement}>
           <Box>
             <Container
-              size="xs"
+              size="lg"
+              px="lg"
+              fluid={true}
               sx={(theme) => ({
                 borderRightColor: theme.colors.dark[4],
                 borderRightWidth: rem(2),
                 borderRightStyle: "solid",
+                minWidth: rem(400)
               })}
             >
             <Text fz="lg">Tasklists</Text>
@@ -302,6 +305,7 @@ const TasksListing = ({}) => {
               />
             </MediaQuery>
 
+            <Box sx={{minWidth: rem(300)}}>
             {tasks && (
               <List
                 values={tasks}
@@ -326,6 +330,7 @@ const TasksListing = ({}) => {
               >
                 New
               </Button>
+            </Box>
             </Box>
           </Container>
         </Box>

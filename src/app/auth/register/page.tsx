@@ -35,10 +35,8 @@ const RegisterPage = () => {
 
 
   async function submitRegister(email: string | undefined, username: string | undefined, password: string | undefined) {
-    const res = await fetch("http://localhost:50505/Register", {
+    const res = await fetch("/api/user/register", {
       method: "POST",
-      headers: { "Content-type": "application/json; charset=UTF-8" },
-
       body: JSON.stringify({
         email: email,
         username: username,
