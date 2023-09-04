@@ -1,16 +1,35 @@
 "use client";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "./../../globals.css";
-import { Button, Form } from "react-bootstrap";
-import { FormEvent, useState } from "react";
+import "@/globals.css";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signIn, signOut, useSession } from "next-auth/react";
-import Loader from "@/components/loader";
+import { signIn } from "next-auth/react";
+import { useForm } from "@mantine/form";
+import {
+  Box,
+  Group,
+  TextInput,
+  Button,
+  PasswordInput,
+} from "@mantine/core";
+
+interface LoginForm {
+  username: string;
+  password: string;
+}
 
 const LoginPage = () => {
   const router = useRouter();
-  const [validationErrors, setValidationErrors] = useState<any>();
   const [loading, setLoading] = useState(false);
+
+  const form = useForm<LoginForm>({
+    initialValues: { username: "", password: "" },
+    validate: {
+      username: (value) =>
+        value.length < 2 ? "Username must have at least 2 letters" : null,
+      password: (value) =>
+        value.length < 5 ? "Password must have at least 8 letters" : null,
+    },
+  });
 
   async function submitLogin(
     email: string | undefined,
@@ -25,7 +44,10 @@ const LoginPage = () => {
       .then((response) => {
         setLoading(false);
         if (response?.error === "CredentialsSignin") {
-          setValidationErrors({ invalid_login: true });
+          form.setErrors({
+            username: "Username or password does not match",
+            password: "Username or password does not match",
+          });
         } else {
           router.push("/dashboard");
         }
@@ -35,61 +57,36 @@ const LoginPage = () => {
       });
   }
 
-  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
-    if (e.currentTarget.checkValidity() === false) {
-      e.preventDefault();
-      e.stopPropagation();
+  const onSubmit = (values: LoginForm) => {
+    if(form.validate().hasErrors === false) {
+      setLoading(true);
+      submitLogin(values.username, values.password);
     }
-    const data = new FormData(e.currentTarget);
-    e.preventDefault();
-    setLoading(true);
-    submitLogin(
-      data.get("email")?.toString(),
-      data.get("password")?.toString()
-    );
   };
 
-  const loginValidated = validationErrors && validationErrors["invalid_login"];
-
   return (
-    <div style={{ margin: 100, color: "white" }}>
-      <Form onSubmit={(e) => onSubmit(e)}>
-        <Form.Group className="mb-3" controlId="formUserName">
-          <Form.Label>Username or email</Form.Label>
-          <Form.Control
-            type="text"
-            name="email"
-            placeholder="Enter username or email"
-            required
-            onChange={(e) => setValidationErrors(null)}
-          />
-          <Form.Control.Feedback type="invalid">
-            Please choose a username.
-          </Form.Control.Feedback>
-          {loginValidated && (
-            <p className="text-red">
-              Username/email or password does not match
-            </p>
-          )}
-        </Form.Group>
-        <Form.Group className="mb-3" controlId="formBasicPassword">
-          <Form.Label>Password</Form.Label>
-          <Form.Control
-            type="password"
-            name="password"
-            placeholder="Password"
-            required
-            onChange={(e) => setValidationErrors(null)}
-          />
-        </Form.Group>
-        <div className="d-flex justify-content-end">
-          <Button variant="primary" type="submit" size="lg">
+    <Box maw={340} mx="auto">
+      <form onSubmit={form.onSubmit((values) => onSubmit(values))}>
+        <TextInput
+          sx={{ marginBottom: 8 }}
+          label="Username/email"
+          placeholder="Username or email"
+          required={true}
+          {...form.getInputProps("username")}
+        />
+        <PasswordInput
+          label="Password"
+          placeholder="Password"
+          required={true}
+          {...form.getInputProps("password")}
+        />
+        <Group position="right" mt="md">
+          <Button loading={loading} type="submit">
             Login
-            {loading && <Loader />}
           </Button>
-        </div>
-      </Form>
-    </div>
+        </Group>
+      </form>
+    </Box>
   );
 };
 

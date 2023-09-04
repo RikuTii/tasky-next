@@ -1,13 +1,38 @@
 "use client";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "./../../globals.css";
-import { Button, Form } from "react-bootstrap";
-import { Dispatch, FormEvent, useState } from "react";
+import "@/globals.css";
+import {useState } from "react";
 import { useRouter } from 'next/navigation'
+import { useForm } from "@mantine/form";
+import {
+  Box,
+  Group,
+  TextInput,
+  Button,
+  PasswordInput,
+} from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+
+interface Registerform {
+  username: string;
+  email: string;
+  password: string;
+}
 
 const RegisterPage = () => {
   const router = useRouter();
-  const [validationErrors, setValidationErrors] = useState<any>();
+  const [loading, {toggle}] = useDisclosure();
+
+  const form = useForm<Registerform>({
+    initialValues: { username: "", email: "", password: "" },
+    validate: {
+      username: (value) =>
+        value.length < 2 ? "Username must have at least 2 letters" : null,
+      email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
+      password: (value) =>
+        value.length < 5 ? "Password must have at least 5 letters" : null,
+    },
+  });
+
 
   async function submitRegister(email: string | undefined, username: string | undefined, password: string | undefined) {
     const res = await fetch("http://localhost:50505/Register", {
@@ -27,80 +52,54 @@ const RegisterPage = () => {
     const data = await res.json();
 
     if (res.status == 400 && data.detail === "error") {
-      setValidationErrors(data.errors);
+      if(data.errors['email_taken']) {
+        form.setFieldError("email", "Email is already registered");
+      }
+      if(data.errors['user_taken']) {
+        form.setFieldError("username", "Username is already taken");
+      }
     }
      else {
+      toggle();
       router.push("/");
      }
   }
 
-  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
-    if (e.currentTarget.checkValidity() === false) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-    const data = new FormData(e.currentTarget);
-    e.preventDefault();
-    submitRegister(data.get("email")?.toString(),data.get("username")?.toString(),data.get("password")?.toString());
+  const onSubmit = (values: Registerform) => {
+    toggle();
+    submitRegister(values.email, values.username, values.password);
   };
 
-  const emailValidated = validationErrors && validationErrors["email_taken"];
-  const userNameValidated = validationErrors && validationErrors["user_taken"];
-
-
   return (
-    <div style={{ margin: 100, color: "white" }}>
-      <Form onSubmit={(e) => onSubmit(e)}>
-        <Form.Group className="mb-3" controlId="formUserName">
-          <Form.Label>Username</Form.Label>
-          <Form.Control
-            type="text"
-            name="username"
-            placeholder="Enter username"
-            required
-            onChange={(e) => setValidationErrors(null)}
-          />
-          <Form.Control.Feedback type="invalid">
-            Please choose a username.
-          </Form.Control.Feedback>
-          {userNameValidated && (
-            <p className="text-red">Username is already taken</p>
-          )}
-        </Form.Group>
-        <Form.Group className="mb-3" controlId="formBasicEmail">
-          <Form.Label>Email address</Form.Label>
-          <Form.Control
-            type="email"
-            name="email"
-            placeholder="Enter email"
-            required
-            onChange={(e) => setValidationErrors(null)}
-          />
-          {emailValidated && (
-            <p className="text-red">Email is already registered</p>
-          )}
-          <Form.Control.Feedback type="invalid">
-            Please choose a username.
-          </Form.Control.Feedback>
-        </Form.Group>
-
-        <Form.Group className="mb-3" controlId="formBasicPassword">
-          <Form.Label>Password</Form.Label>
-          <Form.Control
-            type="password"
-            name="password"
-            placeholder="Password"
-            required
-          />
-        </Form.Group>
-        <Form.Group className="mb-3" controlId="formBasicCheckbox">
-          <Form.Check type="checkbox" name="check" label="Check me out" />
-        </Form.Group>
-        <Button variant="primary" type="submit">
-          Submit
-        </Button>
-      </Form>
-    </div>
+       <Box maw={340} mx="auto">
+      <form onSubmit={form.onSubmit((values) => onSubmit(values))}>
+        <TextInput
+          sx={{ marginBottom: 8 }}
+          label="Username"
+          placeholder="Username"
+          required={true}
+          {...form.getInputProps("username")}
+        />
+        <TextInput
+          sx={{ marginBottom: 8 }}
+          label="Email"
+          placeholder="Email"
+          required={true}
+          {...form.getInputProps("email")}
+        />
+        <PasswordInput
+          label="Password"
+          placeholder="Password"
+          required={true}
+          {...form.getInputProps("password")}
+        />
+        <Group position="right" mt="md">
+          <Button loading={loading} type="submit">
+            Register
+          </Button>
+        </Group>
+      </form>
+    </Box>
   );
 };
 
