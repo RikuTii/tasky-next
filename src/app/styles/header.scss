@@ -10,6 +10,7 @@ $color: #fff;
 
 .nav-bar {
     display: flex;
+    flex-direction: row;
     margin: 10px;
     margin-right: 50px;
     justify-content: space-between;

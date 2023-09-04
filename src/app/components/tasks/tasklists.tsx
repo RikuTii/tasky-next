@@ -23,6 +23,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { notifications } from "@mantine/notifications";
 import { useDisclosure } from "@mantine/hooks";
+import { formatDate } from "@/helpers/timedateformat";
 
 const TaskLists = ({}) => {
   const { data: session, status } = useSession();
@@ -115,7 +116,7 @@ const TaskLists = ({}) => {
           {tasklists.map((tasklist) => (
             <tr key={tasklist.id}>
               <td className="text-light">{tasklist.name}</td>
-              <td className="text-light">{tasklist.createdDate}</td>
+              <td className="text-light">{formatDate(tasklist.createdDate)}</td>
               <td className="text-light">
                 {tasklist.creator ? tasklist.creator.username : 0}
               </td>

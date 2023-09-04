@@ -9,6 +9,7 @@ import {
   CSSObject,
   Burger,
   Box,
+  UnstyledButton,
 } from "@mantine/core";
 
 import "../../styles/header.scss";
@@ -78,6 +79,47 @@ const HeaderMenu = () => {
     });
   };
 
+  const renderLinks = () => {
+    return (
+      <MediaQuery smallerThan="sm" styles={{ display: "inline-block" }}>
+        <Box sx={{ display: "flex" }}>
+          <Link href="/tasklist/manage">
+            <div className={classes.link}>Manage tasklists</div>
+          </Link>
+          <Link href="/tasklist/create">
+            <div className={classes.link}>New tasklist</div>
+          </Link>
+          {status === "authenticated" && (
+            <UnstyledButton>
+              <Link href="/profile">
+                <p className={classes.link}>{session.user?.email}</p>
+              </Link>
+            </UnstyledButton>
+          )}
+          <Link href="/auth/register">
+            <div className={classes.link}>Register</div>
+          </Link>
+          {status === "authenticated" && (
+            <UnstyledButton
+              className={classes.link}
+              onClick={(e) => {
+                e.preventDefault();
+                signUserOut();
+              }}
+            >
+              Sign out
+            </UnstyledButton>
+          )}
+          {status !== "authenticated" && (
+            <Link href="/auth/login">
+              <div className={classes.link}>Sign in</div>
+            </Link>
+          )}
+        </Box>
+      </MediaQuery>
+    );
+  };
+
   return (
     <Header height={HEADER_HEIGHT} mb={70}>
       <Group position="apart">
@@ -87,36 +129,7 @@ const HeaderMenu = () => {
 
         <MediaQuery smallerThan="sm" styles={hideElement}>
           <div>
-            <div className="nav-bar">
-              <Link href="/tasklist/manage">
-                <div className={classes.link}>Manage tasklists</div>
-              </Link>
-              <Link href="/tasklist/create">
-                <div className={classes.link}>New tasklist</div>
-              </Link>
-              {status === "authenticated" && (
-                <p className={classes.link}>{session.user?.email}</p>
-              )}
-              <Link href="/auth/register">
-                <div className={classes.link}>Register</div>
-              </Link>
-              {status === "authenticated" && (
-                <div
-                  className={classes.link}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    signUserOut();
-                  }}
-                >
-                  Sign out
-                </div>
-              )}
-              {status !== "authenticated" && (
-                <Link href="/auth/login">
-                  <div className={classes.link}>Sign in</div>
-                </Link>
-              )}
-            </div>
+            <div className="nav-bar">{renderLinks()}</div>
           </div>
         </MediaQuery>
         <MediaQuery largerThan="sm" styles={{ display: "none" }}>
@@ -135,34 +148,7 @@ const HeaderMenu = () => {
                 borderRadius: 6,
               })}
             >
-              <Link href="/tasklist/manage">
-                <div className={classes.link}>Manage tasklists</div>
-              </Link>
-              <Link href="/tasklist/create">
-                <div className={classes.link}>New tasklist</div>
-              </Link>
-              {status === "authenticated" && (
-                <p className={classes.link}>{session.user?.email}</p>
-              )}
-              <Link href="/auth/register">
-                <div className={classes.link}>Register</div>
-              </Link>
-              {status === "authenticated" && (
-                <div
-                  className={classes.link}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    signUserOut();
-                  }}
-                >
-                  Sign out
-                </div>
-              )}
-              {status !== "authenticated" && (
-                <Link href="/auth/login">
-                  <div className={classes.link}>Sign in</div>
-                </Link>
-              )}
+              {renderLinks()}
             </Box>
           </Box>
         )}
