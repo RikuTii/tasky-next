@@ -19,6 +19,9 @@ import {
   Box,
   rem,
   TextInput,
+  Modal,
+  Group,
+  UnstyledButton,
 } from "@mantine/core";
 import debounce from "lodash/debounce";
 import { forEach } from "lodash";
@@ -29,8 +32,11 @@ import {
   faList,
   faPlus,
   faTrash,
+  faEllipsisVertical,
 } from "@fortawesome/free-solid-svg-icons";
 import { List, arrayMove } from "react-movable";
+import { useDisclosure } from "@mantine/hooks";
+import ManageTask from "./manage-task";
 
 const hideElement: CSSObject = {
   display: "none",
@@ -46,7 +52,11 @@ const TasksListing = ({}) => {
   const [currentTaskList, setCurrentTaskList] = useState<Tasklist>();
   const [taskLists, setTaskLists] = useState<Tasklist[]>();
   const [tasks, setTasks] = useState<Array<Task>>();
+  const [manageTask, setManageTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true);
+  const [opened, { open, close }] = useDisclosure(false, {
+    onClose: () => setManageTask(null),
+  });
 
   useEffect(() => {
     loadTaskLists();
@@ -73,6 +83,15 @@ const TasksListing = ({}) => {
 
   useEffect(() => {
     setTasks(currentTaskList?.tasks);
+    if (currentTaskList && currentTaskList.tasks) {
+      if (manageTask) {
+        currentTaskList.tasks.forEach((task: Task) => {
+          if (task.id === manageTask.id) {
+            setManageTask({ ...task });
+          }
+        });
+      }
+    }
   }, [currentTaskList]);
 
   const createNewTask = () => {
@@ -112,6 +131,7 @@ const TasksListing = ({}) => {
       method: "POST",
       body: JSON.stringify({
         title: task?.title,
+        description: task?.description,
         id: task?.id,
         status: task?.status,
         taskListId: task?.taskListId ?? task?.taskList?.id,
@@ -189,56 +209,72 @@ const TasksListing = ({}) => {
 
   const renderSingleTask = (task: Task) => {
     return (
-      <Flex key={task.id} direction="row" gap="md" sx={{ marginBottom: 8, alignItems: 'center' }}>
+      <Flex
+        key={task.id}
+        direction="row"
+        gap="md"
+        sx={{ marginBottom: 8, alignItems: "center" }}
+      >
         <FontAwesomeIcon icon={faList} color="white" size="1x" />
         <TextInput
-          type="textarea"
           placeholder=""
+          rightSection={
+            <UnstyledButton
+              onClick={() => {
+                setManageTask(task);
+                open();
+              }}
+            >
+              <FontAwesomeIcon
+                icon={faEllipsisVertical}
+                color="white"
+                size="1x"
+              />
+            </UnstyledButton>
+          }
           value={task.title}
           onChange={(event) => {
-            const newTasks = [...(tasks ?? [])];
-            const currentTask = newTasks.find((e) => e.id === task.id);
-            if (currentTask) {
-              currentTask.title = event.target.value;
-              setTasks(newTasks);
-              delayedTaskUpdate(currentTask);
-            }
+            const newTask = { ...task, title: event.target.value };
+            tasks?.splice(tasks.indexOf(task), 1, newTask);
+            setTasks([...(tasks ?? [])]);
+            delayedTaskUpdate(newTask);
           }}
         />
-        <div
-          style={{
-            width: 25,
-            height: 25,
-            border: "2px solid white",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-          onClick={() => {
-            const newTasks = [...(tasks ?? [])];
-            const currentTask = newTasks.find((e) => e.id === task.id);
-            if (currentTask) {
-              if (
-                !currentTask.status ||
-                currentTask.status === TaskStatus.NotDone
-              ) {
-                currentTask.status = TaskStatus.Done;
-              } else {
-                currentTask.status = TaskStatus.NotDone;
+        <UnstyledButton>
+          <div
+            style={{
+              width: 25,
+              height: 25,
+              border: "2px solid white",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            onClick={() => {
+              const newTask = { ...task };
+
+              if (newTask) {
+                if (!newTask.status || newTask.status === TaskStatus.NotDone) {
+                  newTask.status = TaskStatus.Done;
+                } else {
+                  newTask.status = TaskStatus.NotDone;
+                }
+
+                tasks?.splice(tasks.indexOf(task), 1, newTask);
+                setTasks([...(tasks ?? [])]);
+                delayedTaskUpdate(newTask);
               }
-              delayedTaskUpdate(currentTask);
-              setTasks(newTasks);
-            }
-          }}
-        >
-          {task.status === TaskStatus.Done && (
-            <div style={{ marginLeft: 4, marginRight: 8 }}>
-              <FontAwesomeIcon icon={faCheck} color="white" size="1x" />
-            </div>
-          )}
-        </div>
-        <div onClick={() => removeTask(task)}>
+            }}
+          >
+            {task.status === TaskStatus.Done && (
+              <div style={{ marginLeft: 4, marginRight: 8 }}>
+                <FontAwesomeIcon icon={faCheck} color="white" size="1x" />
+              </div>
+            )}
+          </div>
+        </UnstyledButton>
+        <UnstyledButton onClick={() => removeTask(task)}>
           <FontAwesomeIcon icon={faTrash} color="red" size="xl" />
-        </div>
+        </UnstyledButton>
       </Flex>
     );
   };
@@ -268,10 +304,10 @@ const TasksListing = ({}) => {
                 borderRightColor: theme.colors.dark[4],
                 borderRightWidth: rem(2),
                 borderRightStyle: "solid",
-                minWidth: rem(400)
+                minWidth: rem(400),
               })}
             >
-            <Text fz="lg">Tasklists</Text>
+              <Text fz="lg">Tasklists</Text>
               {taskLists?.map((tasklist: Tasklist) => {
                 return (
                   <NavLink
@@ -305,36 +341,60 @@ const TasksListing = ({}) => {
               />
             </MediaQuery>
 
-            <Box sx={{minWidth: rem(300)}}>
-            {tasks && (
-              <List
-                values={tasks}
-                onChange={onDragEnd}
-                renderList={({ children, props }) => (
-                  <div {...props}>{children}</div>
-                )}
-                renderItem={({ value, props }) => (
-                  <div>
-                    {renderSingleTask(value)}
-                  </div>
-                )}
-              />
-            )}
+            <Box sx={{ minWidth: rem(300) }}>
+              {tasks && (
+                <List
+                  values={tasks}
+                  onChange={onDragEnd}
+                  renderList={({ children, props }) => (
+                    <div {...props}>{children}</div>
+                  )}
+                  renderItem={({ value, props }) => (
+                    <div {...props} key={value.id}>
+                      {renderSingleTask(value)}
+                    </div>
+                  )}
+                />
+              )}
 
-            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-              <Button
-                sx={{ marginTop: 8 }}
-                variant="gradient"
-                gradient={{ from: "indigo", to: "cyan" }}
-                onClick={createNewTask}
-              >
-                New
-              </Button>
-            </Box>
+              <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                <Button
+                  sx={{ marginTop: 8 }}
+                  variant="gradient"
+                  gradient={{ from: "indigo", to: "cyan" }}
+                  onClick={createNewTask}
+                >
+                  New
+                </Button>
+              </Box>
             </Box>
           </Container>
         </Box>
       </Flex>
+
+      <Modal opened={opened} onClose={close} title="Manage task">
+        <Box
+          sx={(theme) => ({
+            backgroundColor: theme.colors.dark[6],
+            padding: rem(8),
+          })}
+        >
+          <ManageTask
+            task={manageTask}
+            onTaskUpdated={(task: Task) => {
+              onTaskUpdated(task);
+              close();
+            }}
+          ></ManageTask>
+          <Box sx={{ marginTop: rem(30) }}>
+            <Group position="right">
+              <Button variant="outline" onClick={close}>
+                Close
+              </Button>
+            </Group>
+          </Box>
+        </Box>
+      </Modal>
     </Box>
   );
 };
