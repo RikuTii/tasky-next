@@ -18,6 +18,7 @@ export type File = {
   createdDate?: string;
   name?: string;
   path?: string;
+  type?: string;
 };
 
 type TaskMeta = {
@@ -37,8 +38,8 @@ export type Task = {
     isPast?: number;
     scheduleDate?: string;
     timeTrack?: number;
-    timeElapsed?: string;
-    timeEstimate?: string;
+    timeElapsed?: number;
+    timeEstimate?: number;
 
 };
 

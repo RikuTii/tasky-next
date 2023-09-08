@@ -21,9 +21,9 @@ const UserNotifications = () => {
     ["notificationData"],
     fetchNotifications,
     {
-      staleTime: 65000,
-      refetchInterval: 65000,
-      refetchIntervalInBackground: true,
+    //  staleTime: 65000,
+     // refetchInterval: 65000,
+      //refetchIntervalInBackground: true,
     }
   );
 

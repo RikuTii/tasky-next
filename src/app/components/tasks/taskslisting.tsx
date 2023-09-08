@@ -38,14 +38,6 @@ import { List, arrayMove } from "react-movable";
 import { useDisclosure } from "@mantine/hooks";
 import ManageTask from "./manage-task";
 
-const hideElement: CSSObject = {
-  display: "none",
-};
-
-const showElement: CSSObject = {
-  display: "flex",
-};
-
 const TasksListing = ({}) => {
   const { data: session, status } = useSession();
 
@@ -134,6 +126,9 @@ const TasksListing = ({}) => {
         description: task?.description,
         id: task?.id,
         status: task?.status,
+        timeTrack: task?.timeTrack,
+        timeElapsed: task?.timeElapsed,
+        timeEstimate: task?.timeEstimate,
         taskListId: task?.taskListId ?? task?.taskList?.id,
         order_task: orderId ?? 0,
       }),
@@ -294,7 +289,7 @@ const TasksListing = ({}) => {
       </Title>
 
       <Flex direction={"row"}>
-        <MediaQuery smallerThan="sm" styles={hideElement}>
+        <MediaQuery smallerThan="sm" styles={{display: "none"}}>
           <Box>
             <Container
               size="lg"
@@ -324,7 +319,7 @@ const TasksListing = ({}) => {
 
         <Box>
           <Container size="md">
-            <MediaQuery largerThan="sm" styles={hideElement}>
+            <MediaQuery largerThan="sm" styles={{display: "none"}}>
               <Select
                 label="Tasklists"
                 style={{ marginBottom: 8 }}
@@ -372,7 +367,7 @@ const TasksListing = ({}) => {
         </Box>
       </Flex>
 
-      <Modal opened={opened} onClose={close} title="Manage task">
+      <Modal opened={opened} onClose={close} title="Manage task" size="xl">
         <Box
           sx={(theme) => ({
             backgroundColor: theme.colors.dark[6],
@@ -383,7 +378,7 @@ const TasksListing = ({}) => {
             task={manageTask}
             onTaskUpdated={(task: Task) => {
               onTaskUpdated(task);
-              close();
+            //  close();
             }}
           ></ManageTask>
           <Box sx={{ marginTop: rem(30) }}>

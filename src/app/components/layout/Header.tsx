@@ -10,12 +10,14 @@ import {
   Burger,
   Box,
   UnstyledButton,
+  useMantineTheme,
 } from "@mantine/core";
 
 import "../../styles/header.scss";
 import "./../../globals.css";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useState } from "react";
+import { useMediaQuery, useViewportSize } from "@mantine/hooks";
 const HEADER_HEIGHT = rem(60);
 
 const useStyles = createStyles((theme) => ({
@@ -51,6 +53,10 @@ const useStyles = createStyles((theme) => ({
     fontSize: theme.fontSizes.sm,
     fontWeight: 500,
 
+    [theme.fn.smallerThan("sm")]: {
+      width: "100%",
+    },
+
     "&:hover": {
       backgroundColor:
         theme.colorScheme === "dark"
@@ -71,6 +77,15 @@ const HeaderMenu = () => {
   const { classes } = useStyles();
   const { data: session, status } = useSession();
   const [showMenu, setShowMenu] = useState(false);
+  const theme = useMantineTheme();
+  const { height, width } = useViewportSize();
+  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm}`);
+
+  if (!isMobile) {
+    if (showMenu) {
+      setShowMenu(false);
+    }
+  }
 
   const signUserOut = async () => {
     const result = await signOut({
@@ -82,7 +97,7 @@ const HeaderMenu = () => {
   const renderLinks = () => {
     return (
       <MediaQuery smallerThan="sm" styles={{ display: "inline-block" }}>
-        <Box sx={{ display: "flex" }}>
+        <Box sx={{ display: "flex" }} onClick={() => setShowMenu(false)}>
           <Link href="/tasklist/manage">
             <div className={classes.link}>Manage tasklists</div>
           </Link>
@@ -90,10 +105,8 @@ const HeaderMenu = () => {
             <div className={classes.link}>New tasklist</div>
           </Link>
           {status === "authenticated" && (
-            <UnstyledButton>
-              <Link href="/profile">
-                <p className={classes.link}>{session.user?.email}</p>
-              </Link>
+            <UnstyledButton className={classes.link}>
+              <Link href="/profile">{session.user?.email}</Link>
             </UnstyledButton>
           )}
           <Link href="/auth/register">
@@ -139,7 +152,7 @@ const HeaderMenu = () => {
         </MediaQuery>
 
         {showMenu && (
-          <Box sx={{ position: "absolute", right: 25, top: 55 }}>
+          <Box sx={{ position: "absolute", right: 5, top: 55 }}>
             <Box
               sx={(theme) => ({
                 background: theme.colors.dark[5],
