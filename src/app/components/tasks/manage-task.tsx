@@ -9,19 +9,23 @@ import {
   CopyButton,
   Tooltip,
   ActionIcon,
+  Center,
 } from "@mantine/core";
 import { useEffect, useState } from "react";
 import TimeTrack from "./task-timetrack";
 import TaskGeneral from "./task-general";
 import { faCheck, faShare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { notifications } from "@mantine/notifications";
 
 const ManageTask = (props: {
   task: Task | null;
   taskId?: string;
-  onTaskUpdated?: (task: Task) => void;
+  onTaskUpdated?: (task: Task) => Promise<void>;
 }) => {
   const [localTask, setLocalTask] = useState<Task | null>(null);
+  const [unauthorized, setUnauthorized] = useState(false);
+
   const [attachments, setAttachments] = useState<File[]>([]);
 
   useEffect(() => {
@@ -30,6 +34,12 @@ const ManageTask = (props: {
 
   const loadTask = async () => {
     const response = await fetch("/api/fetch/tasklist/GetTask/" + props.taskId);
+
+    if(!response.ok) {
+      setUnauthorized(true);
+      return;
+    }
+
     const data = await response.json();
     setLocalTask(data);
   };
@@ -64,12 +74,17 @@ const ManageTask = (props: {
 
   if (localTask === null) return <></>;
 
-  const doTaskUpdate = () => {
+  const doTaskUpdate = async () => {
     if (props.onTaskUpdated) {
-      props.onTaskUpdated(localTask);
+      await props.onTaskUpdated(localTask);
     } else {
-      onTaskUpdated(localTask);
+      await onTaskUpdated(localTask);
     }
+
+    notifications.show({
+      title: "Task has been updated",
+      message: localTask.title + " updated",
+    });
   };
 
   const onTaskLocalUpdated = (task: Task) => {
@@ -99,6 +114,10 @@ const ManageTask = (props: {
       doTaskUpdate();
     }
   };
+
+  if(unauthorized) {
+    return <Center><Title order={1}>Unauthorized</Title></Center>
+  }
 
   return (
     <div>

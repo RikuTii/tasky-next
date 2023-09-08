@@ -61,7 +61,7 @@ const TaskGeneral = (props: {
       <Textarea
         placeholder="Description"
         label="Description"
-        value={props.task.description}
+        value={props.task.description ?? ""}
         onChange={(event) => {
           const newTask = { ...props.task, description: event.target.value };
           props.onTaskUpdated(newTask);

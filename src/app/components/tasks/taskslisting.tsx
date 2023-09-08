@@ -376,10 +376,7 @@ const TasksListing = ({}) => {
         >
           <ManageTask
             task={manageTask}
-            onTaskUpdated={(task: Task) => {
-              onTaskUpdated(task);
-            //  close();
-            }}
+            onTaskUpdated={onTaskUpdated}
           ></ManageTask>
           <Box sx={{ marginTop: rem(30) }}>
             <Group position="right">

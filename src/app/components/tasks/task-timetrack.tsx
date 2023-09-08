@@ -146,46 +146,47 @@ const TimeTrack = (props: {
           })
         }
       />
-
-      <Tooltip label="Format: 20m 5s 1h">
-        <TextInput
-          placeholder="Estimated duration"
-          label="Estimated duration"
-          value={estimateTime}
-          onChange={(e) =>
-            setEstimateTime(parseTimeInput(trackTime ?? "", e.target.value))
-          }
-        />
-      </Tooltip>
-      <Text mb={50}>Estimated duration {getEstimatedDuration()}</Text>
-
       {props.task.timeTrack === 1 && (
         <Box>
-          <Progress size="lg" striped value={timeProgress} />
-
-          <Text>Time left {getTimeLeft()}</Text>
-
-          <Tooltip label="Format: 1w 6d 20m 1h 5s">
+          <Tooltip label="Format: 20m 5s 1h">
             <TextInput
-              placeholder="Add time"
-              label="Add time"
-              value={trackTime}
+              placeholder="Estimated duration"
+              label="Estimated duration"
+              value={estimateTime}
               onChange={(e) =>
-                setTrackTime(parseTimeInput(trackTime ?? "", e.target.value))
+                setEstimateTime(parseTimeInput(trackTime ?? "", e.target.value))
               }
             />
           </Tooltip>
-          <Group position="right" my={8}>
-            <Button
-              variant="outline"
-              onClick={(e) => {
-                e.preventDefault();
-                updateTime();
-              }}
-            >
-              Update time
-            </Button>
-          </Group>
+          <Text mb={50}>Estimated duration {getEstimatedDuration()}</Text>
+
+          <Box>
+            <Progress size="lg" striped value={timeProgress} />
+
+            <Text>Time left {getTimeLeft()}</Text>
+
+            <Tooltip label="Format: 1w 6d 20m 1h 5s">
+              <TextInput
+                placeholder="Add time"
+                label="Add time"
+                value={trackTime}
+                onChange={(e) =>
+                  setTrackTime(parseTimeInput(trackTime ?? "", e.target.value))
+                }
+              />
+            </Tooltip>
+            <Group position="right" my={8}>
+              <Button
+                variant="outline"
+                onClick={(e) => {
+                  e.preventDefault();
+                  updateTime();
+                }}
+              >
+                Update time
+              </Button>
+            </Group>
+          </Box>
         </Box>
       )}
     </div>

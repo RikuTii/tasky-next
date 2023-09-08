@@ -30,6 +30,7 @@
     "dayjs": "^1.11.9",
     "eslint": "8.47.0",
     "eslint-config-next": "13.4.19",
+    "glob-parent": "^6.0.2",
     "jsonwebtoken": "^9.0.1",
     "lodash": "^4.17.21",
     "mysql2": "^3.6.0",
@@ -47,6 +48,10 @@
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.2",
     "@types/lodash": "^4.14.197",
-    "@types/react-beautiful-dnd": "^13.1.4"
+    "@types/react-beautiful-dnd": "^13.1.4",
+    "chokidar": "^3.5.3"
+  },
+  "overrides": {
+    "glob-parent": "$glob-parent"
   }
 }
