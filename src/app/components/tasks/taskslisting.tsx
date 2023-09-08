@@ -289,7 +289,7 @@ const TasksListing = ({}) => {
       </Title>
 
       <Flex direction={"row"}>
-        <MediaQuery smallerThan="sm" styles={{display: "none"}}>
+        <MediaQuery smallerThan="sm" styles={{ display: "none" }}>
           <Box>
             <Container
               size="lg"
@@ -319,7 +319,7 @@ const TasksListing = ({}) => {
 
         <Box>
           <Container size="md">
-            <MediaQuery largerThan="sm" styles={{display: "none"}}>
+            <MediaQuery largerThan="sm" styles={{ display: "none" }}>
               <Select
                 label="Tasklists"
                 style={{ marginBottom: 8 }}
@@ -336,7 +336,7 @@ const TasksListing = ({}) => {
               />
             </MediaQuery>
 
-            <Box sx={{ minWidth: rem(300) }}>
+            <Box sx={{ minWidth: rem(320) }}>
               {tasks && (
                 <List
                   values={tasks}

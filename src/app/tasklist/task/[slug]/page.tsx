@@ -8,11 +8,7 @@ export default async function Task({ params }: { params: { slug: string } }) {
   const session = await getServerSession(authOptions);
 
   if (session) {
-    return (
-      <div style={{ margin: 100 }}>
-        <ManageTask task={null} taskId={params.slug}></ManageTask>
-      </div>
-    );
+    return <ManageTask task={null} taskId={params.slug}></ManageTask>;
   }
   return <h1 className="text-white">Access denied</h1>;
 }
