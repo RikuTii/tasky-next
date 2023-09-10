@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import "./../../globals.css";
 import { useForm } from "@mantine/form";
-import { Box, Group, TextInput, Button } from "@mantine/core";
+import { Box, Group, TextInput, Button, Title } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 
 interface TaskForm {
@@ -41,26 +41,25 @@ const CreateTaskList = ({}) => {
 
   return (
     <div>
-      <h1>Create new tasklist</h1>
-      <Box maw={340} mx="auto">
-        <form onSubmit={form.onSubmit((values) => createTaskList(values))}>
-          <TextInput
-            sx={{ marginBottom: 8 }}
-            label="Name"
-            placeholder="Name"
-            {...form.getInputProps("name")}
-          />
-          <TextInput
-            label="Description"
-            placeholder="Description"
-            {...form.getInputProps("description")}
-          />
+      <Title order={2}>Create new tasklist</Title>
 
-          <Group position="right" mt="md">
-            <Button type="submit">Submit</Button>
-          </Group>
-        </form>
-      </Box>
+      <form onSubmit={form.onSubmit((values) => createTaskList(values))}>
+        <TextInput
+          sx={{ marginBottom: 8 }}
+          label="Name"
+          placeholder="Name"
+          {...form.getInputProps("name")}
+        />
+        <TextInput
+          label="Description"
+          placeholder="Description"
+          {...form.getInputProps("description")}
+        />
+
+        <Group position="right" mt="md">
+          <Button type="submit">Submit</Button>
+        </Group>
+      </form>
     </div>
   );
 };

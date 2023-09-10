@@ -136,7 +136,7 @@ const TaskLists = ({}) => {
 
   return (
     <div>
-      <h1>Manage tasklists</h1>
+      <Title order={2} mb={8}>Manage tasklists</Title>
       <Table striped highlightOnHover withBorder withColumnBorders>
         <thead>
           <tr>

@@ -18,10 +18,3 @@ export default async function ProfilePage() {
   return <h1 className="text-white">Access denied</h1>;
 }
 
-export async function getServerSideProps(context: any) {
-  return {
-    props: {
-      session: await getServerSession(context.req, context.res, authOptions),
-    },
-  };
-}

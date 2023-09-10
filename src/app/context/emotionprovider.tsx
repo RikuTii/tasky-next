@@ -32,11 +32,6 @@ export default function EmotionProvider({
     }
   }, []);
 
-  const toggleColorScheme = () => {
-    document.body.style.color = "var(--mantine-color-black)";
-  };
-
-  toggleColorScheme();
 
   useServerInsertedHTML(() => (
     <style

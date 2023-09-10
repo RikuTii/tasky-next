@@ -5,14 +5,8 @@ const FilterWarningsPlugin = require('webpack-filter-warnings-plugin');
 
 const withPWA = require("@ducanh2912/next-pwa").default({
   dest: "public",
-  disable: true,
-  fallbacks: {
-    image: "/static/images/fallback.png",
-    // document: '/other-offline',  // if you want to fallback to a custom page rather than /_offline
-    // font: '/static/font/fallback.woff2',
-    // audio: ...,
-    // video: ...,
-  },
+  disable: process.env.NODE_ENV === "development",
+  reloadOnOnline: true,
 });
 
 const nextConfig = {

@@ -22,6 +22,7 @@ import {
   Modal,
   Group,
   UnstyledButton,
+  Divider,
 } from "@mantine/core";
 import debounce from "lodash/debounce";
 import { forEach } from "lodash";
@@ -285,9 +286,10 @@ const TasksListing = ({}) => {
 
   return (
     <Box sx={{ margin: 10 }}>
-      <Title order={1} sx={{ marginBottom: 8 }}>
+      <Title order={2} sx={{ marginBottom: 8 }}>
         Current Tasks
       </Title>
+      <Divider size="md" my="xs"/>
 
       <Flex direction={"row"}>
         <MediaQuery smallerThan="sm" styles={{ display: "none" }}>

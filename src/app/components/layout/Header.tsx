@@ -15,8 +15,8 @@ import {
 
 import "../../styles/header.scss";
 import "./../../globals.css";
-import { useSession, signIn, signOut } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useSession, signOut } from "next-auth/react";
+import { useState } from "react";
 import { useFocusWithin, useMediaQuery, useViewportSize } from "@mantine/hooks";
 const HEADER_HEIGHT = rem(60);
 
@@ -111,9 +111,11 @@ const HeaderMenu = () => {
               <Link href="/profile">{session.user?.email}</Link>
             </UnstyledButton>
           )}
+          {status !== "authenticated" && (
           <Link href="/auth/register">
             <div className={classes.link}>Register</div>
           </Link>
+          )}
           {status === "authenticated" && (
             <UnstyledButton
               className={classes.link}
@@ -157,7 +159,7 @@ const HeaderMenu = () => {
             </div>
 
             {showMenu && (
-              <Box sx={{ position: "absolute", right: 5, top: 55 }}>
+              <Box sx={{ zIndex: 999, position: "absolute", right: 5, top: 55 }}>
                 <Box
                   sx={(theme) => ({
                     background: theme.colors.dark[5],

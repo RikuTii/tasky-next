@@ -5,9 +5,6 @@ const CreateTask = ({}) => {
   const [tasklist, setTaskList] = useState();
   const [newTask, setNewTask] = useState({ name: "", description: "", listId: 0 });
 
-  useEffect(() => {
-
-  }, []);
 
   const loadTaskLists = async () => {
     const response = await fetch("api/fetch/tasks/TaskList");
