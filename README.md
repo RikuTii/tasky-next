@@ -9,4 +9,5 @@ Tasky uses ASP.net [Web API](https://github.com/RikuTii/tasky-api) through Next.
 - Jira inspired time tracking for tasks
 - Scheduled tasks & notifications
 - Attachments of all types to tasks
+- Upcoming task queue
 
