@@ -3,7 +3,7 @@
     "short_name": "Tasky",
     "icons": [
       {
-        "src": "/icons/android-chrome-192x192.png",
+        "src": "/next.svg",
         "sizes": "192x192",
         "type": "image/png",
         "purpose": "any maskable"

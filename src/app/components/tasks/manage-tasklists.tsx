@@ -4,6 +4,9 @@ import {
   Box,
   Button,
   Center,
+  CloseButton,
+  Container,
+  Divider,
   Flex,
   Grid,
   Group,
@@ -91,7 +94,7 @@ const TaskLists = ({}) => {
   };
 
   const deleteTasklist = async (id: number | undefined) => {
-    if(id === undefined) return;
+    if (id === undefined) return;
 
     fetch("/api/fetch/tasklist/Delete", {
       method: "POST",
@@ -116,8 +119,6 @@ const TaskLists = ({}) => {
     loadTaskLists();
   }, []);
 
-
-
   if (loading) {
     return (
       <Center maw={400} h={100} mx="auto">
@@ -135,8 +136,10 @@ const TaskLists = ({}) => {
     return <></>;
 
   return (
-    <div>
-      <Title order={2} mb={8}>Manage tasklists</Title>
+    <Container size="lg">
+      <Title order={2} mb={8}>
+        Manage tasklists
+      </Title>
       <Table striped highlightOnHover withBorder withColumnBorders>
         <thead>
           <tr>
@@ -194,27 +197,27 @@ const TaskLists = ({}) => {
         >
           <Box>
             <Title order={3}>{shareList?.name}</Title>
+            <Divider size="md" my="xs"></Divider>
             {shareList &&
               shareList.taskListMetas &&
               shareList?.taskListMetas.map((meta: TaskListMeta) => {
                 return (
-                  <Flex
-                    key={meta.userAccount.email}
-                    gap="sm"
-                    sx={{ alignItems: "center" }}
-                  >
-                    <Text fw={700}>
-                      {meta.userAccount.username}
-                    </Text>{" "}
-                    <Text>{meta.userAccount.email}</Text>
-                    <a
-                      onClick={() => {
-                        removeTaskListShare(meta.userAccount.email);
-                      }}
-                    >
-                      <FontAwesomeIcon icon={faXmark} color="black" size="2x" />
-                    </a>
-                  </Flex>
+                  <Grid key={meta.userAccount.id}>
+                    <Grid.Col span={4}>
+                      <Text fw={700}>{meta.userAccount.username}</Text>{" "}
+                    </Grid.Col>
+                    <Grid.Col span={4}>
+                      <Text>{meta.userAccount.email}</Text>
+                    </Grid.Col>
+                    <Grid.Col span={2}>
+                      <CloseButton
+                        size="md"
+                        onClick={() => {
+                          removeTaskListShare(meta.userAccount.email);
+                        }}
+                      ></CloseButton>
+                    </Grid.Col>
+                  </Grid>
                 );
               })}
           </Box>
@@ -245,16 +248,8 @@ const TaskLists = ({}) => {
             </Grid.Col>
           </Grid>
         </Box>
-
-        <Box sx={{ marginTop: rem(30) }}>
-          <Group position="right">
-            <Button variant="outline" onClick={close}>
-              Close
-            </Button>
-          </Group>
-        </Box>
       </Modal>
-    </div>
+    </Container>
   );
 };
 

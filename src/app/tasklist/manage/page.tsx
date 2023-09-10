@@ -5,5 +5,5 @@ import TasksListing from "@/components/tasks/tasks-overview";
 import TaskLists from "@/components/tasks/manage-tasklists";
 
 export default async function Create() {
-  return <div style={{marginLeft: 150,marginRight: 150}}> <TaskLists /> </div>;
+  return <TaskLists />;
 }

@@ -39,7 +39,7 @@ const validateInput = (input: string) => {
           } else if (subChar === "s") {
             timeMs += time * 1000;
           }
-          iter += timeStr.length + 1;
+          iter += timeStr.length;
           break;
         }
         subIter++;

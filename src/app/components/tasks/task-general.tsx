@@ -71,20 +71,21 @@ const TaskGeneral = (props: {
   });
   const { hovered, ref } = useHover();
 
+  useEffect(() => {
+    if (props.task.scheduleDate && scheduleDate === null) {  
+      const d = new Date(props.task.scheduleDate);
+      const dtOffset = new Date(
+        d.setMinutes(d.getMinutes() - d.getTimezoneOffset())
+      );
+      setScheduleDate(dtOffset);
+    }
+  }, [props.task]);
 
   useEffect(() => {
-    if(props.task.scheduleDate) {
-      setScheduleDate(new Date(props.task.scheduleDate));
-    } 
-  },[props.task]);
-
-
-  useEffect(() => {
-    if(scheduleDate) {
+    if (scheduleDate) {  
       props.onScheduleChange(scheduleDate.toISOString());
     }
-  },[scheduleDate]);
-
+  }, [scheduleDate]);
 
   const getAttachmentPath = (file: TaskyFile) => {
     if (file.path?.substring(0, 4) === "http") {
@@ -136,6 +137,7 @@ const TaskGeneral = (props: {
         value={scheduleDate}
         onChange={(e) => setScheduleDate(e)}
         clearable
+        locale="fi-FI"
         label="Schedule task"
         placeholder="Pick date and time"
         size="sm"
@@ -231,7 +233,7 @@ const TaskGeneral = (props: {
                       backgroundColor: theme.colors.dark[4],
                     })}
                   >
-                     <Box
+                    <Box
                       h={0}
                       className={classes.attchDisplayContainer}
                       sx={{
@@ -272,15 +274,8 @@ const TaskGeneral = (props: {
         </Flex>
       </ScrollArea>
 
-      <Modal opened={opened} size="lg" onClose={close}>
-        {showFile && (
-          <Image src={getAttachmentPath(showFile)} radius="md" fit="contain" />
-        )}
-      </Modal>
-      <Modal opened={opened} size="lg" onClose={close}>
-        {showFile && (
-          <Image src={getAttachmentPath(showFile)} radius="md" fit="contain" />
-        )}
+      <Modal opened={opened} size="auto" onClose={close}>
+        {showFile && <Image src={getAttachmentPath(showFile)} radius="md" />}
       </Modal>
     </div>
   );

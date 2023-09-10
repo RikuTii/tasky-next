@@ -118,7 +118,7 @@ const ManageTask = (props: {
 
   const onTaskScheduleChange = (date: string) => {
     setLocalTask({ ...localTask, scheduleDate: date });
-  }
+  };
 
   const addAttachments = async () => {
     let formData = new FormData();
@@ -137,7 +137,7 @@ const ManageTask = (props: {
     fetch("/api/fetch/task/RemoveAttachment", {
       method: "POST",
       body: JSON.stringify({
-        id: taskMeta.id
+        id: taskMeta.id,
       }),
     })
       .then(() => {
@@ -201,7 +201,11 @@ const ManageTask = (props: {
         </Grid>
 
         <Group position="right" my={8}>
-          <Button variant="filled" onClick={saveTaskChanges}>
+          <Button
+            variant="gradient"
+            gradient={{ from: "indigo", to: "cyan" }}
+            onClick={saveTaskChanges}
+          >
             Save changes
           </Button>
         </Group>

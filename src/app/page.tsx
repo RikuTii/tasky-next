@@ -2,7 +2,7 @@
 import { useSession } from "next-auth/react";
 import "./globals.css";
 import styles from "./page.module.css";
-import { Loader, Center, Flex } from "@mantine/core";
+import { Loader, Center, Flex, Container } from "@mantine/core";
 import TasksListing from "./components/tasks/tasks-overview";
 import TasksUpcoming from "./components/tasks/task-upcoming";
 
@@ -20,10 +20,10 @@ export default function Home() {
   if (status === "authenticated") {
     return (
       <Center>
-        <Flex direction={"column"}>
+        <Container fluid>
           <TasksUpcoming />
           <TasksListing />
-        </Flex>
+        </Container>
       </Center>
     );
   }
@@ -32,8 +32,7 @@ export default function Home() {
     <main className={styles.main}>
       <div>
         <p>
-          Get started by editing&nbsp;
-          <code>src/app/page.tsx</code>
+          Sign in or register to start creating tasks today!
         </p>
       </div>
     </main>

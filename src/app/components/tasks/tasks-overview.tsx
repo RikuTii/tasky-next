@@ -1,6 +1,6 @@
 "use client";
 import "./../../globals.css";
-import React, { useEffect, useState, useContext, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Tasklist, Task, TaskStatus } from "@/types/tasks.d";
 import {
   Container,
@@ -8,21 +8,18 @@ import {
   Select,
   Loader,
   Center,
-  SimpleGrid,
   Text,
   Title,
-  Grid,
   NavLink,
-  CSSObject,
   MediaQuery,
   Button,
   Box,
   rem,
   TextInput,
   Modal,
-  Group,
   UnstyledButton,
   Divider,
+  Skeleton,
 } from "@mantine/core";
 import debounce from "lodash/debounce";
 import { forEach } from "lodash";
@@ -52,6 +49,7 @@ const TasksListing = ({}) => {
   });
 
   useEffect(() => {
+    setLoading(true);
     loadTaskLists();
   }, []);
 
@@ -214,6 +212,7 @@ const TasksListing = ({}) => {
       >
         <FontAwesomeIcon icon={faList} color="white" size="1x" />
         <TextInput
+          w="100%"
           placeholder=""
           rightSection={
             <UnstyledButton
@@ -276,114 +275,120 @@ const TasksListing = ({}) => {
     );
   };
 
-  if (loading) {
+  /* if (loading) {
     return (
       <Center maw={400} h={100} mx="auto">
         <Loader />
       </Center>
     );
-  }
+  }*/
 
   return (
-    <Box sx={{ margin: 10 }}>
-      <Title order={2} sx={{ marginBottom: 8 }}>
-        Current Tasks
-      </Title>
-      <Divider size="md" my="xs"/>
-
-      <Flex direction={"row"}>
-        <MediaQuery smallerThan="sm" styles={{ display: "none" }}>
+    <Skeleton visible={loading}>
+      <Box sx={{ margin: 10 }} mih={400}>
+        <Title order={2} sx={{ marginBottom: 8 }}>
+          Current Tasks
+        </Title>
+        <Divider size="md" my="xs" />
+        <Flex direction={"row"}>
+          <MediaQuery smallerThan="sm" styles={{ display: "none" }}>
+            <Box>
+              <Container
+                size="lg"
+                px="lg"
+                fluid={true}
+                sx={(theme) => ({
+                  borderRightColor: theme.colors.dark[4],
+                  borderRightWidth: rem(2),
+                  borderRightStyle: "solid",
+                  minWidth: rem(400),
+                })}
+              >
+                <Text fz="lg">Tasklists</Text>
+                <Divider size="xs" my="xs" />
+                {taskLists?.map((tasklist: Tasklist) => {
+                  return (
+                    <NavLink
+                      key={"nav" + tasklist.id}
+                      label={tasklist.name}
+                      active={tasklist.id === currentTaskList?.id}
+                      onClick={(e) => setCurrentTaskList(tasklist)}
+                    />
+                  );
+                })}
+              </Container>
+            </Box>
+          </MediaQuery>
           <Box>
-            <Container
-              size="lg"
-              px="lg"
-              fluid={true}
-              sx={(theme) => ({
-                borderRightColor: theme.colors.dark[4],
-                borderRightWidth: rem(2),
-                borderRightStyle: "solid",
-                minWidth: rem(400),
-              })}
-            >
-              <Text fz="lg">Tasklists</Text>
-              {taskLists?.map((tasklist: Tasklist) => {
-                return (
-                  <NavLink
-                    key={"nav" + tasklist.id}
-                    label={tasklist.name}
-                    active={tasklist.id === currentTaskList?.id}
-                    onClick={(e) => setCurrentTaskList(tasklist)}
-                  />
-                );
-              })}
+            <Container size="md">
+              <MediaQuery largerThan="sm" styles={{ display: "none" }}>
+                <Select
+                  label="Tasklists"
+                  style={{ marginBottom: 8 }}
+                  value={String(currentTaskList?.id)}
+                  data={
+                    taskLists?.map((tasklist: Tasklist) => ({
+                      value: String(tasklist.id),
+                      label: tasklist.name ?? "",
+                    })) ?? []
+                  }
+                  onChange={(e) =>
+                    setCurrentTaskList(
+                      taskLists?.find((t) => t.id === Number(e))
+                    )
+                  }
+                />
+              </MediaQuery>
+              <MediaQuery
+                query="(width >= 68em) or (width <= 48em)"
+                styles={{ minWidth: 400 }}
+              >
+                <Container p={0} m={0}>
+                  {tasks && (
+                    <List
+                      values={tasks}
+                      onChange={onDragEnd}
+                      renderList={({ children, props }) => (
+                        <div {...props}>{children}</div>
+                      )}
+                      renderItem={({ value, props }) => (
+                        <div {...props} key={value.id}>
+                          {renderSingleTask(value)}
+                        </div>
+                      )}
+                    />
+                  )}
+
+                  <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                    <Button
+                      sx={{ marginTop: 8 }}
+                      variant="gradient"
+                      gradient={{ from: "indigo", to: "cyan" }}
+                      onClick={createNewTask}
+                    >
+                      New
+                    </Button>
+                  </Box>
+                </Container>
+              </MediaQuery>
             </Container>
           </Box>
-        </MediaQuery>
-
-        <Box>
-          <Container size="md">
-            <MediaQuery largerThan="sm" styles={{ display: "none" }}>
-              <Select
-                label="Tasklists"
-                style={{ marginBottom: 8 }}
-                value={String(currentTaskList?.id)}
-                data={
-                  taskLists?.map((tasklist: Tasklist) => ({
-                    value: String(tasklist.id),
-                    label: tasklist.name ?? "",
-                  })) ?? []
-                }
-                onChange={(e) =>
-                  setCurrentTaskList(taskLists?.find((t) => t.id === Number(e)))
-                }
-              />
-            </MediaQuery>
-
-            <Box sx={{ minWidth: rem(320) }}>
-              {tasks && (
-                <List
-                  values={tasks}
-                  onChange={onDragEnd}
-                  renderList={({ children, props }) => (
-                    <div {...props}>{children}</div>
-                  )}
-                  renderItem={({ value, props }) => (
-                    <div {...props} key={value.id}>
-                      {renderSingleTask(value)}
-                    </div>
-                  )}
-                />
-              )}
-
-              <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                <Button
-                  sx={{ marginTop: 8 }}
-                  variant="gradient"
-                  gradient={{ from: "indigo", to: "cyan" }}
-                  onClick={createNewTask}
-                >
-                  New
-                </Button>
-              </Box>
-            </Box>
-          </Container>
-        </Box>
-      </Flex>
-
-      <Modal opened={opened} onClose={close} title="Manage task" size="xl">
-        <Box
-          sx={(theme) => ({
-            backgroundColor: theme.colors.dark[6],
-            padding: rem(8),
-          })}
-        >
-          <ManageTask
-            task={manageTask}
-            onTaskUpdated={onTaskUpdated}
-          ></ManageTask>
-        </Box>
-      </Modal>
-    </Box>
+        </Flex>
+        <Modal opened={opened} onClose={close} title="Manage task" size="xl">
+          <Box
+            sx={(theme) => ({
+              backgroundColor: theme.colors.dark[6],
+              padding: rem(8),
+            })}
+          >
+            <ManageTask
+              task={manageTask}
+              onTaskUpdated={onTaskUpdated}
+            ></ManageTask>
+          </Box>
+        </Modal>
+      </Box>
+    </Skeleton>
   );
 };
 

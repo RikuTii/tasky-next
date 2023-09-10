@@ -53,7 +53,7 @@ const LoginPage = () => {
             password: "Username or password does not match",
           });
         } else {
-          router.push("/dashboard");
+          router.push("/");
         }
       })
       .catch((e) => {
