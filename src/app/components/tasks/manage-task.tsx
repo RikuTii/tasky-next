@@ -1,5 +1,5 @@
 "use client";
-import { Task } from "@/types/tasks";
+import { Task, TaskMeta } from "@/types/tasks";
 import {
   Button,
   Group,
@@ -21,7 +21,6 @@ import TaskGeneral from "./task-general";
 import { faCheck, faShare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { notifications } from "@mantine/notifications";
-import { useSession } from "next-auth/react";
 
 const ManageTask = (props: {
   task: Task | null;
@@ -61,11 +60,11 @@ const ManageTask = (props: {
         timeTrack: task.timeTrack,
         timeElapsed: task.timeElapsed,
         timeEstimate: task.timeEstimate,
+        scheduleDate: task.scheduleDate,
         taskListId: task?.taskListId ?? task?.taskList?.id,
       }),
     })
       .then(() => {
-        setLoading(true);
         loadTask();
       })
       .catch((err) => {
@@ -75,6 +74,7 @@ const ManageTask = (props: {
 
   useEffect(() => {
     if (props.taskId) {
+      setLoading(true);
       loadTask();
     } else {
       setLoading(false);
@@ -116,6 +116,10 @@ const ManageTask = (props: {
     setLocalTask({ ...task });
   };
 
+  const onTaskScheduleChange = (date: string) => {
+    setLocalTask({ ...localTask, scheduleDate: date });
+  }
+
   const addAttachments = async () => {
     let formData = new FormData();
     attachments.forEach((file) => {
@@ -127,6 +131,21 @@ const ManageTask = (props: {
       method: "POST",
       body: formData,
     });
+  };
+
+  const removeAttachment = async (taskMeta: TaskMeta) => {
+    fetch("/api/fetch/task/RemoveAttachment", {
+      method: "POST",
+      body: JSON.stringify({
+        id: taskMeta.id
+      }),
+    })
+      .then(() => {
+        saveTaskChanges();
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
   };
 
   const saveTaskChanges = async () => {
@@ -172,6 +191,8 @@ const ManageTask = (props: {
               task={localTask}
               attachments={attachments}
               onFilesAdded={setAttachments}
+              onFileRemove={removeAttachment}
+              onScheduleChange={onTaskScheduleChange}
             />
           </Grid.Col>
           <Grid.Col md={6} lg={6}>

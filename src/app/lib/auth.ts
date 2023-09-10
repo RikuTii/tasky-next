@@ -1,13 +1,12 @@
-import NextAuth, { NextAuthOptions } from "next-auth"
-import GoogleProvider from "next-auth/providers/google"
-import FacebookProvider from "next-auth/providers/facebook"
-import GithubProvider from "next-auth/providers/github"
-import TwitterProvider from "next-auth/providers/twitter"
-import Auth0Provider from "next-auth/providers/auth0"
-import Credentials from "next-auth/providers/credentials"
-import { TypeORMAdapter } from "@auth/typeorm-adapter"
-import { DataSourceOptions } from "typeorm"
-
+import NextAuth, { NextAuthOptions } from "next-auth";
+import GoogleProvider from "next-auth/providers/google";
+import FacebookProvider from "next-auth/providers/facebook";
+import GithubProvider from "next-auth/providers/github";
+import TwitterProvider from "next-auth/providers/twitter";
+import Auth0Provider from "next-auth/providers/auth0";
+import Credentials from "next-auth/providers/credentials";
+import { TypeORMAdapter } from "@auth/typeorm-adapter";
+import { DataSourceOptions } from "typeorm";
 
 const connection: DataSourceOptions = {
   type: "mysql",
@@ -17,8 +16,8 @@ const connection: DataSourceOptions = {
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   insecureAuth: true,
-  synchronize: false
-}
+  synchronize: false,
+};
 
 // For more information on each option (and a full list of options) go to
 // https://next-auth.js.org/configuration/options
@@ -59,54 +58,69 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials: any, req: any): Promise<any> {
-        
+        const loginUser = {
+          ...credentials,
+          accounts: [
+            {
+              devices: [
+                {
+                  type: credentials.device,
+                },
+              ],
+            },
+          ],
+        };
+
         const res = await fetch(process.env.API_URL + "Login", {
           method: "POST",
           headers: { "Content-type": "application/json; charset=UTF-8" },
-    
-          body: JSON.stringify(
-            credentials
-          ),
+
+          body: JSON.stringify(loginUser),
         });
 
-        if(res.status !== 200) {
+        if (!res.ok) {
           return null;
         }
 
         const u = await res.json();
-        console.log(u);
+
         const user = {
           name: u.userName,
           email: u.email,
-          id: u.id
+          id: u.id,
+          fcmToken: u.fcm_token,
         };
         if (user) {
           return user;
         } else {
           return null;
         }
-   
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, user, account}: any) {
+    async jwt({ token, user, account, session, trigger }: any) {
       token.userRole = "admin";
-      if(user) {
+      if(trigger === 'update') {
+        token.fcmToken = session.fcmToken;
+      }
+      if (user) {
         token.email = user.email;
         token.username = user.userName;
         token.id = user.id;
+        token.fcmToken = user.fcmToken;
       }
-      return token
+      return token;
     },
     async session({ session, token, user }: any) {
-      // Send properties to the client, like an access_token from a provider.
+
       if (token) {
         session.user.email = token.email;
         session.user.username = token.userName;
         session.user.id = token.id;
+        session.user.fcmToken = token.fcmToken;
       }
-      return session
-    }
+      return session;
+    },
   },
-}
+};

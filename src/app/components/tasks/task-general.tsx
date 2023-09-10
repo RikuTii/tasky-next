@@ -14,26 +14,77 @@ import {
   Modal,
   BackgroundImage,
   rem,
-  UnstyledButton,
   CloseButton,
+  createStyles,
 } from "@mantine/core";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DateTimePicker } from "@mantine/dates";
 import { useDisclosure, useHover } from "@mantine/hooks";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useSession } from "next-auth/react";
+import { retrieveToken } from "@/helpers/fcmtoken";
+
+const useStyles = createStyles((theme) => ({
+  attchDisplay: {
+    display: "flex",
+    justifyContent: "flex-end",
+    alignItems: "flex-end",
+  },
+  attchNoContent: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  attchDisplayContainer: {
+    display: "flex",
+    justifyContent: "flex-end",
+    transition: "opacity 0.2s ease-out",
+  },
+  attchDesc: {
+    backgroundColor: "black",
+    height: 20,
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  attchText: {
+    textOverflow: "clip",
+    overflow: "hidden",
+    whiteSpace: "nowrap",
+  },
+}));
 
 const TaskGeneral = (props: {
   task: Task;
   onTaskUpdated: (task: Task) => void;
   onFilesAdded: (files: File[]) => void;
+  onFileRemove: (taskMeta: TaskMeta) => void;
+  onScheduleChange: (date: string) => void;
   attachments: File[];
 }) => {
   const [showFileInput, setShowFileInput] = useState(false);
   const [showFile, setShowFile] = useState<TaskyFile | null>(null);
+  const [scheduleDate, setScheduleDate] = useState<Date | null>(null);
+  const { data, update } = useSession();
+  const { classes } = useStyles();
   const [opened, { open, close }] = useDisclosure(false, {
     onClose: () => setShowFile(null),
   });
   const { hovered, ref } = useHover();
+
+
+  useEffect(() => {
+    if(props.task.scheduleDate) {
+      setScheduleDate(new Date(props.task.scheduleDate));
+    } 
+  },[props.task]);
+
+
+  useEffect(() => {
+    if(scheduleDate) {
+      props.onScheduleChange(scheduleDate.toISOString());
+    }
+  },[scheduleDate]);
+
 
   const getAttachmentPath = (file: TaskyFile) => {
     if (file.path?.substring(0, 4) === "http") {
@@ -44,6 +95,19 @@ const TaskGeneral = (props: {
     }
 
     return "";
+  };
+
+  const askNotificationPermission = async () => {
+    if (data?.user?.fcmToken === "pending") {
+      const token = await retrieveToken();
+      update({ fcmToken: token });
+      fetch("/api/fetch/UpdateDevice", {
+        method: "POST",
+        body: JSON.stringify({
+          fcmToken: token,
+        }),
+      });
+    }
   };
 
   return (
@@ -68,8 +132,10 @@ const TaskGeneral = (props: {
         }}
       />
       <DateTimePicker
+        onClick={askNotificationPermission}
+        value={scheduleDate}
+        onChange={(e) => setScheduleDate(e)}
         clearable
-        defaultValue={new Date()}
         label="Schedule task"
         placeholder="Pick date and time"
         size="sm"
@@ -115,68 +181,41 @@ const TaskGeneral = (props: {
         <Flex direction={"row"} ref={ref}>
           {props.task.meta?.map((meta: TaskMeta) => {
             return (
-              <Box
-                key={meta.file?.path}
-                miw={140}
-                mih={125}
-                mx={5}
-                mt={8}
-                onClick={() => {
-                  if (meta.file?.type === "image") {
-                    setShowFile(meta.file ?? null);
-                    open();
-                  }
-                }}
-              >
+              <Box key={meta.file?.path} miw={140} mih={125} mx={5} mt={8}>
                 {meta.file?.type === "image" ? (
                   <BackgroundImage
                     src={getAttachmentPath(meta.file)}
                     radius="md"
+                    onClick={() => {
+                      if (meta.file?.type === "image") {
+                        setShowFile(meta.file ?? null);
+                        open();
+                      }
+                    }}
                   >
+                    <Box
+                      h={0}
+                      className={classes.attchDisplayContainer}
+                      sx={{
+                        opacity: hovered ? "1" : "0.0",
+                      }}
+                    >
+                      <CloseButton
+                        title="Delete attachment"
+                        size="sm"
+                        color="red"
+                        variant="filled"
+                        onClick={() => props.onFileRemove(meta)}
+                      />
+                    </Box>
                     <Box
                       key={meta.file?.path}
                       miw={140}
                       mih={110}
-                      sx={{
-                        display: "flex",
-                        justifyContent: "flex-end",
-                        alignItems: "flex-end",
-                      }}
+                      className={classes.attchDisplay}
                     >
-                      <Box
-                        sx={{
-                          alignSelf: "flex-start",
-                          opacity: hovered ? "1" : "0.0",
-                          marginRight: 10,
-                          transition: "opacity 0.2s ease-out",
-                        }}
-                      >
-                        <CloseButton
-                          title="Delete attachment"
-                          size="sm"
-                          color="red"
-                          variant="filled"
-                        />
-                      </Box>
-                      <Box
-                        miw={"100%"}
-                        maw={100}
-                        sx={{
-                          backgroundColor: "black",
-                          height: 20,
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                        }}
-                      >
-                        <Text
-                          pl={rem(4)}
-                          sx={{
-                            textOverflow: "clip",
-                            overflow: "hidden",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
+                      <Box miw={"100%"} maw={100} className={classes.attchDesc}>
+                        <Text pl={rem(4)} className={classes.attchText}>
                           {meta.file?.name}
                         </Text>
                       </Box>
@@ -192,14 +231,22 @@ const TaskGeneral = (props: {
                       backgroundColor: theme.colors.dark[4],
                     })}
                   >
-                    <Box
-                      mih={90}
+                     <Box
+                      h={0}
+                      className={classes.attchDisplayContainer}
                       sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
+                        opacity: hovered ? "1" : "0.0",
                       }}
                     >
+                      <CloseButton
+                        title="Delete attachment"
+                        size="sm"
+                        color="red"
+                        variant="filled"
+                        onClick={() => props.onFileRemove(meta)}
+                      />
+                    </Box>
+                    <Box mih={90} className={classes.attchNoContent}>
                       <Text sx={{ whiteSpace: "nowrap", textAlign: "center" }}>
                         No preview
                       </Text>
@@ -211,21 +258,9 @@ const TaskGeneral = (props: {
                       download={meta.file?.name}
                       miw={"100%"}
                       maw={140}
-                      sx={{
-                        backgroundColor: "black",
-                        height: 20,
-                        display: "flex",
-                        alignItems: "center",
-                      }}
+                      className={classes.attchDesc}
                     >
-                      <Text
-                        sx={{
-                          textOverflow: "clip",
-                          overflow: "hidden",
-                          whiteSpace: "nowrap",
-                        }}
-                        pl={rem(4)}
-                      >
+                      <Text className={classes.attchText} pl={rem(4)}>
                         {meta.file?.name}
                       </Text>
                     </Box>

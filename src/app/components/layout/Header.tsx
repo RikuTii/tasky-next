@@ -16,8 +16,8 @@ import {
 import "../../styles/header.scss";
 import "./../../globals.css";
 import { useSession, signIn, signOut } from "next-auth/react";
-import { useState } from "react";
-import { useMediaQuery, useViewportSize } from "@mantine/hooks";
+import { useEffect, useState } from "react";
+import { useFocusWithin, useMediaQuery, useViewportSize } from "@mantine/hooks";
 const HEADER_HEIGHT = rem(60);
 
 const useStyles = createStyles((theme) => ({
@@ -76,12 +76,14 @@ const hideElement: CSSObject = {
 const HeaderMenu = () => {
   const { classes } = useStyles();
   const { data: session, status } = useSession();
-  const [showMenu, setShowMenu] = useState(false);
-  const theme = useMantineTheme();
   const { height, width } = useViewportSize();
+  const { ref, focused } = useFocusWithin();
+  const [showMenu, setShowMenu] = useState(false);
+
+  const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm}`);
 
-  if (!isMobile) {
+  if (!isMobile || !focused) {
     if (showMenu) {
       setShowMenu(false);
     }
@@ -146,25 +148,30 @@ const HeaderMenu = () => {
           </div>
         </MediaQuery>
         <MediaQuery largerThan="sm" styles={{ display: "none" }}>
-          <div>
-            <Burger opened={showMenu} onClick={(e) => setShowMenu(!showMenu)} />
+          <div ref={ref}>
+            <div>
+              <Burger
+                opened={showMenu}
+                onClick={(e) => setShowMenu(!showMenu)}
+              />
+            </div>
+
+            {showMenu && (
+              <Box sx={{ position: "absolute", right: 5, top: 55 }}>
+                <Box
+                  sx={(theme) => ({
+                    background: theme.colors.dark[5],
+                    display: "flex",
+                    flexDirection: "column",
+                    borderRadius: 6,
+                  })}
+                >
+                  {renderLinks()}
+                </Box>
+              </Box>
+            )}
           </div>
         </MediaQuery>
-
-        {showMenu && (
-          <Box sx={{ position: "absolute", right: 5, top: 55 }}>
-            <Box
-              sx={(theme) => ({
-                background: theme.colors.dark[5],
-                display: "flex",
-                flexDirection: "column",
-                borderRadius: 6,
-              })}
-            >
-              {renderLinks()}
-            </Box>
-          </Box>
-        )}
       </Group>
     </Header>
   );

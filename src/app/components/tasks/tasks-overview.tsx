@@ -39,7 +39,7 @@ import { useDisclosure } from "@mantine/hooks";
 import ManageTask from "./manage-task";
 
 const TasksListing = ({}) => {
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
 
   const [currentTaskList, setCurrentTaskList] = useState<Tasklist>();
   const [taskLists, setTaskLists] = useState<Tasklist[]>();
@@ -129,6 +129,7 @@ const TasksListing = ({}) => {
         timeTrack: task?.timeTrack,
         timeElapsed: task?.timeElapsed,
         timeEstimate: task?.timeEstimate,
+        scheduleDate: task?.scheduleDate,
         taskListId: task?.taskListId ?? task?.taskList?.id,
         order_task: orderId ?? 0,
       }),
@@ -378,13 +379,6 @@ const TasksListing = ({}) => {
             task={manageTask}
             onTaskUpdated={onTaskUpdated}
           ></ManageTask>
-          <Box sx={{ marginTop: rem(30) }}>
-            <Group position="right">
-              <Button variant="outline" onClick={close}>
-                Close
-              </Button>
-            </Group>
-          </Box>
         </Box>
       </Modal>
     </Box>

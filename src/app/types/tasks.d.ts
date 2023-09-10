@@ -23,6 +23,7 @@ export type File = {
 
 type TaskMeta = {
   file?: File;
+  id: number;
 };
 
 export type Task = {

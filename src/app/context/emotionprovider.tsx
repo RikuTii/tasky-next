@@ -1,14 +1,14 @@
 "use client";
-import { Notifications } from "@mantine/notifications";
+import { Notifications, notifications } from "@mantine/notifications";
 import { MantineProvider, useEmotionCache } from "@mantine/core";
 import "@/globals.css";
 import HeaderMenu from "@/components/layout/header";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import UserNotifications from "@/components/user-notifications";
 import { useServerInsertedHTML } from "next/navigation";
 import { CacheProvider } from "@emotion/react";
+import { getMessaging, onMessage } from "firebase/messaging";
+import { useEffect } from "react";
+import fireBaseApp from "./firebase";
 
-const queryClient = new QueryClient();
 export default function EmotionProvider({
   children,
 }: {
@@ -16,6 +16,21 @@ export default function EmotionProvider({
 }) {
   const cache = useEmotionCache();
   cache.compat = true;
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+      const messaging = getMessaging(fireBaseApp);
+      const unsubscribe = onMessage(messaging, (payload) => {
+        notifications.show({
+          title: payload.notification?.title,
+          message: payload.notification?.body,
+        });
+      });
+      return () => {
+        unsubscribe();
+      };
+    }
+  }, []);
 
   const toggleColorScheme = () => {
     document.body.style.color = "var(--mantine-color-black)";
@@ -41,12 +56,9 @@ export default function EmotionProvider({
           colorScheme: "dark",
         }}
       >
-        <QueryClientProvider client={queryClient}>
-          <UserNotifications></UserNotifications>
-          <Notifications />
-          <HeaderMenu />
-          {children}
-        </QueryClientProvider>
+        <Notifications />
+        <HeaderMenu />
+        {children}
       </MantineProvider>
     </CacheProvider>
   );

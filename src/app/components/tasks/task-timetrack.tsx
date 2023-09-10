@@ -8,6 +8,7 @@ import {
   Switch,
   Progress,
   Tooltip,
+  Divider,
 } from "@mantine/core";
 import { useEffect, useState } from "react";
 const parseTimeInput = (oldinput: string, input: string) => {
@@ -148,7 +149,7 @@ const TimeTrack = (props: {
       />
       {props.task.timeTrack === 1 && (
         <Box>
-          <Tooltip label="Format: 20m 5s 1h">
+          <Tooltip label="Format: 1h 20m 15s">
             <TextInput
               placeholder="Estimated duration"
               label="Estimated duration"
@@ -158,14 +159,12 @@ const TimeTrack = (props: {
               }
             />
           </Tooltip>
-          <Text mb={50}>Estimated duration {getEstimatedDuration()}</Text>
-
+          <Text>Estimated duration {getEstimatedDuration()}</Text>
+          <Divider my="md" />
           <Box>
             <Progress size="lg" striped value={timeProgress} />
-
             <Text>Time left {getTimeLeft()}</Text>
-
-            <Tooltip label="Format: 1w 6d 20m 1h 5s">
+            <Tooltip label="Format: 1w 6d 20m 1h 15s">
               <TextInput
                 placeholder="Add time"
                 label="Add time"

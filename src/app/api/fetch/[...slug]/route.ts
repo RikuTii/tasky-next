@@ -21,6 +21,10 @@ export async function GET(
       },
     });
 
+    if(!res.ok) {
+      return NextResponse.error();
+    }
+
     return res;
   }
 
@@ -48,6 +52,10 @@ export async function POST(
       },
       body: body
     });
+
+    if(!res.ok) {
+      return NextResponse.error();
+    }
 
     return res;
   }

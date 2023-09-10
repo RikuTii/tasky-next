@@ -14,6 +14,7 @@ declare module "next-auth" {
   interface User {
     role?: Role;
     userName?: string;
+    fcmToken?: string;
     id?: number;
   }
 

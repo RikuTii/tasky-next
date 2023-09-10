@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useForm } from "@mantine/form";
+import { useOs } from '@mantine/hooks';
 import {
   Box,
   Group,
@@ -20,6 +21,7 @@ interface LoginForm {
 const LoginPage = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const os = useOs();
 
   const form = useForm<LoginForm>({
     initialValues: { username: "", password: "" },
@@ -27,7 +29,7 @@ const LoginPage = () => {
       username: (value) =>
         value.length < 2 ? "Username must have at least 2 letters" : null,
       password: (value) =>
-        value.length < 5 ? "Password must have at least 8 letters" : null,
+        value.length < 5 ? "Password must have at least 5 letters" : null,
     },
   });
 
@@ -35,11 +37,13 @@ const LoginPage = () => {
     email: string | undefined,
     password: string | undefined
   ) {
+
     await signIn("credentials", {
       email: email,
       password: password,
+      device: os,
       redirect: false,
-      redirectUrl: "/dashboard",
+      redirectUrl: "/",
     })
       .then((response) => {
         setLoading(false);

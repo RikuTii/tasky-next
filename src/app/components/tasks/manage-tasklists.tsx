@@ -3,9 +3,11 @@ import React, { useEffect, useState, useContext } from "react";
 import {
   Box,
   Button,
+  Center,
   Flex,
   Grid,
   Group,
+  Loader,
   Modal,
   Table,
   Text,
@@ -29,6 +31,7 @@ const TaskLists = ({}) => {
   const { data: session, status } = useSession();
   const [tasklists, setTaskLists] = useState<Tasklist[] | null>(null);
   const [shareList, setShareList] = useState<Tasklist | null>(null);
+  const [loading, setLoading] = useState(false);
   const [opened, { open, close }] = useDisclosure(false, {
     onClose: () => setShareEmail(""),
   });
@@ -38,7 +41,7 @@ const TaskLists = ({}) => {
     const response = await fetch("/api/fetch/tasklist/Index");
     const data = await response.json();
     setTaskLists(data);
-
+    setLoading(false);
     if (shareList) {
       data.forEach((list: Tasklist) => {
         if (list.id == shareList.id) {
@@ -87,9 +90,41 @@ const TaskLists = ({}) => {
       });
   };
 
+  const deleteTasklist = async (id: number | undefined) => {
+    if(id === undefined) return;
+
+    fetch("/api/fetch/tasklist/Delete", {
+      method: "POST",
+      body: JSON.stringify({
+        id: id,
+      }),
+    })
+      .then(() => {
+        loadTaskLists();
+        notifications.show({
+          title: "Delete tasklist",
+          message: "Tasklist has been deleted",
+        });
+      })
+      .catch((err) => {
+        console.log(err.message);
+      });
+  };
+
   useEffect(() => {
+    setLoading(true);
     loadTaskLists();
   }, []);
+
+
+
+  if (loading) {
+    return (
+      <Center maw={400} h={100} mx="auto">
+        <Loader />
+      </Center>
+    );
+  }
 
   if (
     tasklists === undefined ||
@@ -137,6 +172,7 @@ const TaskLists = ({}) => {
               <td>
                 <div
                   style={{ alignContent: "center", justifyContent: "center" }}
+                  onClick={() => deleteTasklist(tasklist.id)}
                 >
                   {tasklist.creator &&
                     tasklist.creator.id == session?.user?.id && (
