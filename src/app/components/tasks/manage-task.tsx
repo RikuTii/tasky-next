@@ -14,6 +14,7 @@ import {
   MediaQuery,
   Box,
   Container,
+  Skeleton,
 } from "@mantine/core";
 import { useEffect, useState } from "react";
 import TimeTrack from "./task-timetrack";
@@ -80,14 +81,6 @@ const ManageTask = (props: {
       setLoading(false);
     }
   }, [props.taskId]);
-
-  if (loading) {
-    return (
-      <Center>
-        <Loader />
-      </Center>
-    );
-  }
 
   if (unauthorized) {
     return (
@@ -159,6 +152,7 @@ const ManageTask = (props: {
   };
 
   return (
+    <Skeleton visible={loading}>
     <MediaQuery largerThan="sm" styles={{ margin: props.taskId ? 150 : 0 }}>
       <Container px={props.taskId ? "lg" : ""} fluid>
         <Flex justify="space-between" align="center">
@@ -211,6 +205,7 @@ const ManageTask = (props: {
         </Group>
       </Container>
     </MediaQuery>
+    </Skeleton>
   );
 };
 

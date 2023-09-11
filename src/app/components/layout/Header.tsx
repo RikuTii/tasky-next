@@ -100,21 +100,25 @@ const HeaderMenu = () => {
     return (
       <MediaQuery smallerThan="sm" styles={{ display: "inline-block" }}>
         <Box sx={{ display: "flex" }} onClick={() => setShowMenu(false)}>
-          <Link href="/tasklist/manage">
-            <div className={classes.link}>Manage tasklists</div>
-          </Link>
-          <Link href="/tasklist/create">
-            <div className={classes.link}>New tasklist</div>
-          </Link>
+          {status === "authenticated" && (
+            <Link href="/tasklist/manage">
+              <div className={classes.link}>Manage tasklists</div>
+            </Link>
+          )}
+          {status === "authenticated" && (
+            <Link href="/tasklist/create">
+              <div className={classes.link}>New tasklist</div>
+            </Link>
+          )}
           {status === "authenticated" && (
             <UnstyledButton className={classes.link}>
               <Link href="/profile">{session.user?.email}</Link>
             </UnstyledButton>
           )}
           {status !== "authenticated" && (
-          <Link href="/auth/register">
-            <div className={classes.link}>Register</div>
-          </Link>
+            <Link href="/auth/register">
+              <div className={classes.link}>Register</div>
+            </Link>
           )}
           {status === "authenticated" && (
             <UnstyledButton
@@ -150,7 +154,7 @@ const HeaderMenu = () => {
           </div>
         </MediaQuery>
         <MediaQuery largerThan="sm" styles={{ display: "none" }}>
-          <div ref={ref}>
+          <div ref={ref} style={{ marginRight: 8 }}>
             <div>
               <Burger
                 opened={showMenu}
@@ -159,7 +163,9 @@ const HeaderMenu = () => {
             </div>
 
             {showMenu && (
-              <Box sx={{ zIndex: 999, position: "absolute", right: 5, top: 55 }}>
+              <Box
+                sx={{ zIndex: 999, position: "absolute", right: 5, top: 55 }}
+              >
                 <Box
                   sx={(theme) => ({
                     background: theme.colors.dark[5],
