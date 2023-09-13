@@ -35,7 +35,7 @@ const TasksUpcoming = (props: {}) => {
 
   return (
     <Skeleton visible={loading}>
-      <ScrollArea w="100%" mih={150}>
+      <ScrollArea w="100%" mih={upcoming && upcoming.length > 0 ? 150 : 0}>
         <Flex mt={8} mb={8} gap={"lg"} direction={"row"} w={450} pb={8}>
           {upcoming?.map((task: Task) => {
             return (

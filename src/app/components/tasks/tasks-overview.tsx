@@ -6,8 +6,6 @@ import {
   Container,
   Flex,
   Select,
-  Loader,
-  Center,
   Text,
   Title,
   NavLink,
@@ -105,6 +103,9 @@ const TasksListing = ({}) => {
       taskList: currentTaskList,
       taskListId: currentTaskList?.id,
     };
+
+    onTaskUpdated(newTask);
+
     if (tasks) {
       const newTasks = [...tasks];
       newTasks.push(newTask);
@@ -220,6 +221,7 @@ const TasksListing = ({}) => {
                 setManageTask(task);
                 open();
               }}
+              p={rem(12)}
             >
               <FontAwesomeIcon
                 icon={faEllipsisVertical}
@@ -339,10 +341,7 @@ const TasksListing = ({}) => {
                   }
                 />
               </MediaQuery>
-              <MediaQuery
-                query="(width >= 68em) or (width <= 48em)"
-                styles={{ minWidth: 400 }}
-              >
+
                 <Container p={0} m={0}>
                   {tasks && (
                     <List
@@ -370,7 +369,7 @@ const TasksListing = ({}) => {
                     </Button>
                   </Box>
                 </Container>
-              </MediaQuery>
+ 
             </Container>
           </Box>
         </Flex>

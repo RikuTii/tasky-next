@@ -16,10 +16,11 @@ import {
   rem,
   CloseButton,
   createStyles,
+  useMantineTheme,
 } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { DateTimePicker } from "@mantine/dates";
-import { useDisclosure, useHover } from "@mantine/hooks";
+import { useDisclosure, useFocusReturn, useFocusTrap, useFocusWithin, useHover, useMediaQuery } from "@mantine/hooks";
 import { useSession } from "next-auth/react";
 import { retrieveToken } from "@/helpers/fcmtoken";
 
@@ -70,9 +71,12 @@ const TaskGeneral = (props: {
     onClose: () => setShowFile(null),
   });
   const { hovered, ref } = useHover();
+  const theme = useMantineTheme();
+  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm}`);
+
 
   useEffect(() => {
-    if (props.task.scheduleDate && scheduleDate === null) {  
+    if (props.task.scheduleDate && scheduleDate === null) {
       const d = new Date(props.task.scheduleDate);
       const dtOffset = new Date(
         d.setMinutes(d.getMinutes() - d.getTimezoneOffset())
@@ -82,7 +86,7 @@ const TaskGeneral = (props: {
   }, [props.task]);
 
   useEffect(() => {
-    if (scheduleDate) {  
+    if (scheduleDate) {
       props.onScheduleChange(scheduleDate.toISOString());
     }
   }, [scheduleDate]);
@@ -101,13 +105,15 @@ const TaskGeneral = (props: {
   const askNotificationPermission = async () => {
     if (data?.user?.fcmToken === "pending") {
       const token = await retrieveToken();
-      update({ fcmToken: token });
-      fetch("/api/fetch/UpdateDevice", {
-        method: "POST",
-        body: JSON.stringify({
-          fcmToken: token,
-        }),
-      });
+      if (token !== "") {
+        update({ fcmToken: token });
+        fetch("/api/fetch/UpdateDevice", {
+          method: "POST",
+          body: JSON.stringify({
+            fcmToken: token,
+          }),
+        });
+      }
     }
   };
 
@@ -199,7 +205,7 @@ const TaskGeneral = (props: {
                       h={0}
                       className={classes.attchDisplayContainer}
                       sx={{
-                        opacity: hovered ? "1" : "0.0",
+                        opacity: (hovered || isMobile) ? "1" : "0.0",
                       }}
                     >
                       <CloseButton
@@ -207,7 +213,13 @@ const TaskGeneral = (props: {
                         size="sm"
                         color="red"
                         variant="filled"
-                        onClick={() => props.onFileRemove(meta)}
+                        onClick={(e) => {
+                          if(hovered || isMobile) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            props.onFileRemove(meta);
+                          }                  
+                        }}
                       />
                     </Box>
                     <Box
@@ -245,7 +257,11 @@ const TaskGeneral = (props: {
                         size="sm"
                         color="red"
                         variant="filled"
-                        onClick={() => props.onFileRemove(meta)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          props.onFileRemove(meta);
+                        }}
                       />
                     </Box>
                     <Box mih={90} className={classes.attchNoContent}>

@@ -142,7 +142,7 @@ const HeaderMenu = () => {
   };
 
   return (
-    <Header height={HEADER_HEIGHT} mb={70}>
+    <Header height={HEADER_HEIGHT} mb={30}>
       <Group position="apart">
         <Link href="/">
           <div className="logo">Tasky</div>

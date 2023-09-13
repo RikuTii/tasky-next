@@ -55,23 +55,27 @@ const TaskLists = ({}) => {
   };
 
   const shareTaskList = async () => {
-    fetch("/api/fetch/tasklist/ShareTaskList", {
+    const response = await fetch("/api/fetch/tasklist/ShareTaskList", {
       method: "POST",
       body: JSON.stringify({
         id: shareList?.id,
         email: shareEmail,
       }),
-    })
-      .then(() => {
-        loadTaskLists();
-        notifications.show({
-          title: "Tasklist shared",
-          message: "Tasklist shared to " + shareEmail,
-        });
-      })
-      .catch((err) => {
-        console.log(err.message);
+    });
+
+    if(response.ok) {
+      loadTaskLists();
+      notifications.show({
+        title: "Tasklist shared",
+        message: "Tasklist shared to " + shareEmail,
       });
+    } else {
+      notifications.show({
+        title: <p style={{color: "red"}}>Error occured</p>,
+        message: "Email is not registered to a user",
+      });
+    }
+   
   };
   const removeTaskListShare = async (email: string) => {
     fetch("/api/fetch/tasklist/RemoveShareTaskList", {
@@ -151,7 +155,7 @@ const TaskLists = ({}) => {
           </tr>
         </thead>
         <tbody>
-          {tasklists.map((tasklist) => (
+          {tasklists.map((tasklist, index) => (
             <tr key={tasklist.id}>
               <td className="text-light">{tasklist.name}</td>
               <td className="text-light">{formatDate(tasklist.createdDate)}</td>
@@ -173,15 +177,21 @@ const TaskLists = ({}) => {
                 </div>
               </td>
               <td>
-                <div
-                  style={{ alignContent: "center", justifyContent: "center" }}
-                  onClick={() => deleteTasklist(tasklist.id)}
-                >
-                  {tasklist.creator &&
-                    tasklist.creator.id == session?.user?.id && (
-                      <FontAwesomeIcon icon={faTrash} color="red" size="2xl" />
-                    )}
-                </div>
+                {index > 0 && (
+                  <div
+                    style={{ alignContent: "center", justifyContent: "center" }}
+                    onClick={() => deleteTasklist(tasklist.id)}
+                  >
+                    {tasklist.creator &&
+                      tasklist.creator.id == session?.user?.id && (
+                        <FontAwesomeIcon
+                          icon={faTrash}
+                          color="red"
+                          size="2xl"
+                        />
+                      )}
+                  </div>
+                )}
               </td>
             </tr>
           ))}

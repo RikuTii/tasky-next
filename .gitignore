@@ -36,8 +36,7 @@ next-env.d.ts
 
 notes.txt
 .env.local
-
-next.config.js
+.env.production
 
 public/workbox-*.js
 public/worker-*.js
@@ -46,3 +45,4 @@ public/sw.js
 public/sw.js.map
 public/fallback-*.js
 public/firebase-messaging-sw.js
+build_script.js

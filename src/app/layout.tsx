@@ -1,8 +1,8 @@
-
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import NextAuthProvider from "./context/sessionprovider";
 import EmotionProvider from "./context/emotionprovider";
+import Head from "next/head";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,12 +19,13 @@ export const metadata: Metadata = {
   },
   description: APP_DESCRIPTION,
   manifest: "/manifest.json",
-  themeColor: "#FFFFFF",
+  themeColor: "#25262B",
+  colorScheme: "dark",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
+    statusBarStyle: "black-translucent",
     title: APP_DEFAULT_TITLE,
-    // startUpImage: [],
+     startupImage: "/icons/logo-512.png",
   },
   formatDetection: {
     telephone: false,
@@ -32,6 +33,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: APP_NAME,
+    images: "/icons/logo-512.png",
     title: {
       default: APP_DEFAULT_TITLE,
       template: APP_TITLE_TEMPLATE,
@@ -44,6 +46,7 @@ export const metadata: Metadata = {
       default: APP_DEFAULT_TITLE,
       template: APP_TITLE_TEMPLATE,
     },
+    images: "/icons/logo-512.png",
     description: APP_DESCRIPTION,
   },
 };
@@ -55,11 +58,19 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <Head>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta
+          name="apple-mobile-web-app-status-bar-style"
+          content="black-translucent"
+        />
+        <meta name="msapplication-navbutton-color" content="#25262B" />
+        <meta name="msapplication-TileColor" content="#25262B" />
+        <meta name="theme-color" content="#25262B" />
+      </Head>
       <body className={inter.className}>
         <NextAuthProvider>
-          <EmotionProvider>
-            {children}
-          </EmotionProvider>
+          <EmotionProvider>{children}</EmotionProvider>
         </NextAuthProvider>
       </body>
     </html>
