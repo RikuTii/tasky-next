@@ -1,38 +1,25 @@
 "use client";
 import "./../../globals.css";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { Tasklist, Task, TaskStatus } from "@/types/tasks.d";
 import {
   Container,
   Flex,
   Select,
-  Text,
-  Title,
   NavLink,
   MediaQuery,
   Button,
   Box,
   rem,
-  TextInput,
   Modal,
-  UnstyledButton,
   Divider,
   Skeleton,
 } from "@mantine/core";
-import debounce from "lodash/debounce";
 import { forEach } from "lodash";
 import { useSession } from "next-auth/react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faCheck,
-  faList,
-  faPlus,
-  faTrash,
-  faEllipsisVertical,
-} from "@fortawesome/free-solid-svg-icons";
-import { List, arrayMove } from "react-movable";
 import { useDisclosure } from "@mantine/hooks";
 import ManageTask from "./manage-task";
+import SortableTaskList from "./sortable-tasklist";
 
 const TasksListing = ({}) => {
   const { data: session, status, update } = useSession();
@@ -42,6 +29,7 @@ const TasksListing = ({}) => {
   const [tasks, setTasks] = useState<Array<Task>>();
   const [manageTask, setManageTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true);
+
   const [opened, { open, close }] = useDisclosure(false, {
     onClose: () => setManageTask(null),
   });
@@ -113,11 +101,6 @@ const TasksListing = ({}) => {
     }
   };
 
-  const delayedTaskUpdate = useCallback(
-    debounce((q: Task) => onTaskUpdated(q), 1000),
-    []
-  );
-
   const onTaskUpdated = async (task: Task, orderId: number = 0) => {
     fetch("/api/fetch/task/CreateOrUpdateTask", {
       method: "POST",
@@ -142,171 +125,26 @@ const TasksListing = ({}) => {
       });
   };
 
-  const removeTask = async (task: Task) => {
-    fetch("/api/fetch/task/RemoveTask", {
-      method: "POST",
-      body: JSON.stringify({
-        id: task?.id,
-        taskListId: task?.taskListId ?? task?.taskList?.id,
-      }),
-    })
-      .then(() => {
-        refreshTaskLists(task?.taskListId ?? task?.taskList?.id ?? 0);
-      })
-      .catch((err) => {
-        console.log(err.message);
-      });
-  };
-
   const doneTasks = tasks?.filter((e) => e.status === TaskStatus.Done);
   const pendingTasks = tasks?.filter((e) => e.status !== TaskStatus.Done);
-
   const filteredTasks = pendingTasks?.concat(doneTasks ?? []);
-
-  const reOrderTasks = async (orderedTasks: Task[]) => {
-    fetch("/api/fetch/task/ReOrderTasks", {
-      method: "POST",
-      body: JSON.stringify({
-        taskListId: currentTaskList?.id,
-        tasks: orderedTasks,
-      }),
-    })
-      .then(() => {
-        if (orderedTasks)
-          refreshTaskLists(
-            orderedTasks[0]?.taskListId ?? orderedTasks[0]?.taskList?.id ?? 0
-          );
-      })
-      .catch((err) => {
-        console.log(err.message);
-      });
-  };
-
-  const reorder = (
-    list: Task[] | undefined,
-    startIndex: number,
-    endIndex: number
-  ) => {
-    const result: Task[] = Array.from(list ?? []);
-    const [removed] = result.splice(startIndex, 1);
-    result.splice(endIndex, 0, removed);
-
-    return result;
-  };
-
-  const onDragEnd = (result: any) => {
-    const items: Task[] = reorder(tasks, result.oldIndex, result.newIndex);
-
-    if (items) {
-      reOrderTasks(items);
-    }
-    setTasks(items);
-  };
-
-  const renderSingleTask = (task: Task) => {
-    return (
-      <Flex
-        key={task.id}
-        direction="row"
-        gap="md"
-        sx={{ marginBottom: 8, alignItems: "center" }}
-      >
-        <FontAwesomeIcon icon={faList} color="white" size="1x" />
-        <TextInput
-          w="100%"
-          placeholder=""
-          rightSection={
-            <UnstyledButton
-              onClick={() => {
-                setManageTask(task);
-                open();
-              }}
-              p={rem(12)}
-            >
-              <FontAwesomeIcon
-                icon={faEllipsisVertical}
-                color="white"
-                size="1x"
-              />
-            </UnstyledButton>
-          }
-          value={task.title}
-          onChange={(event) => {
-            const newTask = { ...task, title: event.target.value };
-            tasks?.splice(tasks.indexOf(task), 1, newTask);
-            setTasks([...(tasks ?? [])]);
-            delayedTaskUpdate(newTask);
-          }}
-        />
-        <UnstyledButton>
-          <div
-            style={{
-              width: 25,
-              height: 25,
-              border: "2px solid white",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-            onClick={() => {
-              const newTask = { ...task };
-
-              if (newTask) {
-                if (!newTask.status || newTask.status === TaskStatus.NotDone) {
-                  newTask.status = TaskStatus.Done;
-                } else {
-                  newTask.status = TaskStatus.NotDone;
-                }
-
-                tasks?.splice(tasks.indexOf(task), 1, newTask);
-                setTasks([...(tasks ?? [])]);
-                delayedTaskUpdate(newTask);
-              }
-            }}
-          >
-            {task.status === TaskStatus.Done && (
-              <div style={{ marginLeft: 4, marginRight: 8 }}>
-                <FontAwesomeIcon icon={faCheck} color="white" size="1x" />
-              </div>
-            )}
-          </div>
-        </UnstyledButton>
-        <UnstyledButton onClick={() => removeTask(task)}>
-          <FontAwesomeIcon icon={faTrash} color="red" size="xl" />
-        </UnstyledButton>
-      </Flex>
-    );
-  };
-
-  /* if (loading) {
-    return (
-      <Center maw={400} h={100} mx="auto">
-        <Loader />
-      </Center>
-    );
-  }*/
 
   return (
     <Skeleton visible={loading}>
-      <Box sx={{ margin: 10 }} mih={400}>
-        <Title order={2} sx={{ marginBottom: 8 }}>
-          Current Tasks
-        </Title>
+      <Container mih={400} w={800} fluid p={0}>
         <Divider size="md" my="xs" />
-        <Flex direction={"row"}>
+        <Flex direction={"row"} pl={0}>
           <MediaQuery smallerThan="sm" styles={{ display: "none" }}>
-            <Box>
+            <Box w="50%">
               <Container
-                size="lg"
                 px="lg"
                 fluid={true}
                 sx={(theme) => ({
                   borderRightColor: theme.colors.dark[4],
                   borderRightWidth: rem(2),
                   borderRightStyle: "solid",
-                  minWidth: rem(400),
                 })}
               >
-                <Text fz="lg">Tasklists</Text>
                 <Divider size="xs" my="xs" />
                 {taskLists?.map((tasklist: Tasklist) => {
                   return (
@@ -321,11 +159,13 @@ const TasksListing = ({}) => {
               </Container>
             </Box>
           </MediaQuery>
-          <Box>
-            <Container size="md">
+          <MediaQuery
+            smallerThan="sm"
+            styles={{ width: "100%", marginLeft: 0 }}
+          >
+            <Box w="50%" sx={{ overflow: "clip" }} ml={rem(8)}>
               <MediaQuery largerThan="sm" styles={{ display: "none" }}>
                 <Select
-                  label="Tasklists"
                   style={{ marginBottom: 8 }}
                   value={String(currentTaskList?.id)}
                   data={
@@ -342,36 +182,30 @@ const TasksListing = ({}) => {
                 />
               </MediaQuery>
 
-                <Container p={0} m={0}>
-                  {tasks && (
-                    <List
-                      values={tasks}
-                      onChange={onDragEnd}
-                      renderList={({ children, props }) => (
-                        <div {...props}>{children}</div>
-                      )}
-                      renderItem={({ value, props }) => (
-                        <div {...props} key={value.id}>
-                          {renderSingleTask(value)}
-                        </div>
-                      )}
-                    />
-                  )}
+              <SortableTaskList
+                tasks={tasks}
+                tasklistId={currentTaskList?.id}
+                setTasks={setTasks}
+                onTaskUpdated={onTaskUpdated}
+                refreshTaskLists={refreshTaskLists}
+                setManageTask={(task: Task) => {
+                  setManageTask(task);
+                  open();
+                }}
+              />
 
-                  <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                    <Button
-                      sx={{ marginTop: 8 }}
-                      variant="gradient"
-                      gradient={{ from: "indigo", to: "cyan" }}
-                      onClick={createNewTask}
-                    >
-                      New
-                    </Button>
-                  </Box>
-                </Container>
- 
-            </Container>
-          </Box>
+              <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                <Button
+                  sx={{ marginTop: 8 }}
+                  variant="gradient"
+                  gradient={{ from: "indigo", to: "cyan" }}
+                  onClick={createNewTask}
+                >
+                  New
+                </Button>
+              </Box>
+            </Box>
+          </MediaQuery>
         </Flex>
         <Modal opened={opened} onClose={close} title="Manage task" size="xl">
           <Box
@@ -386,7 +220,7 @@ const TasksListing = ({}) => {
             ></ManageTask>
           </Box>
         </Modal>
-      </Box>
+      </Container>
     </Skeleton>
   );
 };
