@@ -158,7 +158,7 @@ const ManageTask = (props: {
         <Flex justify="space-between" align="center">
           <Title order={3}>{localTask.title}</Title>
           <CopyButton
-            value={`${process.env.APP_DOMAIN}/tasklist/task/${localTask.id}`}
+            value={`${process.env.NEXT_PUBLIC_APP_DOMAIN}/tasklist/task/${localTask.id}`}
             timeout={2000}
           >
             {({ copied, copy }) => (

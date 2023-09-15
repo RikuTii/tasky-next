@@ -17,6 +17,7 @@
     "@fortawesome/free-regular-svg-icons": "^6.4.2",
     "@fortawesome/free-solid-svg-icons": "^6.4.2",
     "@fortawesome/react-fontawesome": "^0.2.0",
+    "@mantine/carousel": "^6.0.20",
     "@mantine/core": "^6.0.19",
     "@mantine/dates": "^6.0.20",
     "@mantine/form": "^6.0.19",
@@ -29,12 +30,16 @@
     "@types/react-dom": "18.2.7",
     "bootstrap": "^5.3.1",
     "dayjs": "^1.11.9",
+    "embla-carousel-autoplay": "^8.0.0-rc12",
+    "embla-carousel-react": "^8.0.0-rc12",
     "eslint": "8.47.0",
     "eslint-config-next": "13.4.19",
     "firebase": "^10.3.1",
     "glob-parent": "^6.0.2",
+    "idb-keyval": "^6.2.1",
     "jsonwebtoken": "^9.0.1",
     "lodash": "^4.17.21",
+    "mssql": "^10.0.1",
     "mysql2": "^3.6.0",
     "next": "13.4.19",
     "next-auth": "^4.23.1",
@@ -49,11 +54,12 @@
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.2",
     "@types/lodash": "^4.14.197",
-    "@types/react-beautiful-dnd": "^13.1.4",
     "chokidar": "^3.5.3",
     "webpack": "^5.88.2"
   },
   "overrides": {
-    "glob-parent": "$glob-parent"
+    "glob-parent": "$glob-parent",
+    "embla-carousel-react": "$embla-carousel-react",
+    "mssql": "$mssql"
   }
 }

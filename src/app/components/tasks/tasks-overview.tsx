@@ -20,6 +20,7 @@ import { useSession } from "next-auth/react";
 import { useDisclosure } from "@mantine/hooks";
 import ManageTask from "./manage-task";
 import SortableTaskList from "./sortable-tasklist";
+import { set, get } from "idb-keyval";
 
 const TasksListing = ({}) => {
   const { data: session, status, update } = useSession();
@@ -42,7 +43,19 @@ const TasksListing = ({}) => {
   const loadTaskLists = async () => {
     const response = await fetch("/api/fetch/tasklist/Index");
     const data = await response.json();
-    setCurrentTaskList(data[0]);
+    let listExists = false;
+
+    const tasklist_id = await get("tasklist_id");
+    forEach(data, (taskList: Tasklist) => {
+      if (taskList.id == tasklist_id) {
+        setCurrentTaskList(taskList);
+        listExists = true;
+      }
+    });
+
+    if (!listExists) {
+      setCurrentTaskList(data[0]);
+    }
     setLoading(false);
     setTaskLists(data);
   };
@@ -125,6 +138,11 @@ const TasksListing = ({}) => {
       });
   };
 
+  const setActiveTaskList = (tasklist: Tasklist) => {
+    setCurrentTaskList(tasklist);
+    set("tasklist_id", tasklist.id);
+  };
+
   const doneTasks = tasks?.filter((e) => e.status === TaskStatus.Done);
   const pendingTasks = tasks?.filter((e) => e.status !== TaskStatus.Done);
   const filteredTasks = pendingTasks?.concat(doneTasks ?? []);
@@ -138,7 +156,7 @@ const TasksListing = ({}) => {
             <Box w="50%">
               <Container
                 px="lg"
-                fluid={true}
+                fluid
                 sx={(theme) => ({
                   borderRightColor: theme.colors.dark[4],
                   borderRightWidth: rem(2),
@@ -152,7 +170,7 @@ const TasksListing = ({}) => {
                       key={"nav" + tasklist.id}
                       label={tasklist.name}
                       active={tasklist.id === currentTaskList?.id}
-                      onClick={(e) => setCurrentTaskList(tasklist)}
+                      onClick={(e) => setActiveTaskList(tasklist)}
                     />
                   );
                 })}

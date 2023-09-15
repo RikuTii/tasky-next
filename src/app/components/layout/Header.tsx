@@ -11,6 +11,9 @@ import {
   Box,
   UnstyledButton,
   useMantineTheme,
+  Image,
+  Flex,
+  Title,
 } from "@mantine/core";
 
 import "../../styles/header.scss";
@@ -26,6 +29,7 @@ const useStyles = createStyles((theme) => ({
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+    width: "100vw",
   },
 
   links: {
@@ -50,11 +54,13 @@ const useStyles = createStyles((theme) => ({
       theme.colorScheme === "dark"
         ? theme.colors.dark[0]
         : theme.colors.gray[7],
-    fontSize: theme.fontSizes.sm,
+    fontSize: theme.fontSizes.md,
     fontWeight: 500,
 
     [theme.fn.smallerThan("sm")]: {
       width: "100%",
+      fontSize: theme.fontSizes.lg,
+      textAlign: "center",
     },
 
     "&:hover": {
@@ -82,6 +88,7 @@ const HeaderMenu = () => {
 
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm}`);
+  const hideSidebar = useMediaQuery(`(max-width: ${theme.breakpoints.lg}`);
 
   if (!isMobile || !focused) {
     if (showMenu) {
@@ -110,7 +117,7 @@ const HeaderMenu = () => {
               <div className={classes.link}>New tasklist</div>
             </Link>
           )}
-          {status === "authenticated" && (
+          {status === "authenticated" && hideSidebar && (
             <UnstyledButton className={classes.link}>
               <Link href="/profile">{session.user?.email}</Link>
             </UnstyledButton>
@@ -142,45 +149,51 @@ const HeaderMenu = () => {
   };
 
   return (
-    <Header height={HEADER_HEIGHT} mb={30}>
-      <Group position="apart">
-        <Link href="/">
-          <div className="logo">Tasky</div>
-        </Link>
+    <Header height={HEADER_HEIGHT} mb={8} className={classes.inner}>
+      <Link href="/">
+        <Flex align={"center"} ml={rem(8)} justify={"center"} gap="sm">
+          <Image maw={32} mah={32} radius="md" src="/icons/logo.png"></Image>
+          <Title order={3}>Tasky</Title>
+        </Flex>
+      </Link>
 
-        <MediaQuery smallerThan="sm" styles={hideElement}>
+      <MediaQuery smallerThan="sm" styles={hideElement}>
+        <div>
+          <div className="nav-bar">{renderLinks()}</div>
+        </div>
+      </MediaQuery>
+      <MediaQuery largerThan="sm" styles={{ display: "none" }}>
+        <div ref={ref} style={{ marginRight: 8 }}>
           <div>
-            <div className="nav-bar">{renderLinks()}</div>
+            <Burger opened={showMenu} onClick={(e) => setShowMenu(!showMenu)} />
           </div>
-        </MediaQuery>
-        <MediaQuery largerThan="sm" styles={{ display: "none" }}>
-          <div ref={ref} style={{ marginRight: 8 }}>
-            <div>
-              <Burger
-                opened={showMenu}
-                onClick={(e) => setShowMenu(!showMenu)}
-              />
-            </div>
 
-            {showMenu && (
+          {showMenu && (
+            <Box
+              sx={{
+                zIndex: 999,
+                position: "absolute",
+                left: 5,
+                top: 55,
+                right: 5,
+              }}
+            >
               <Box
-                sx={{ zIndex: 999, position: "absolute", right: 5, top: 55 }}
+                sx={(theme) => ({
+                  background: theme.colors.dark[5],
+                  display: "flex",
+                  flexDirection: "column",
+                  borderRadius: 6,
+                  h: 50,
+                  width: "calc(100vw - rem(5))",
+                })}
               >
-                <Box
-                  sx={(theme) => ({
-                    background: theme.colors.dark[5],
-                    display: "flex",
-                    flexDirection: "column",
-                    borderRadius: 6,
-                  })}
-                >
-                  {renderLinks()}
-                </Box>
+                {renderLinks()}
               </Box>
-            )}
-          </div>
-        </MediaQuery>
-      </Group>
+            </Box>
+          )}
+        </div>
+      </MediaQuery>
     </Header>
   );
 };

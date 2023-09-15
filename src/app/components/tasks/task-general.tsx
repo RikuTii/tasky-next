@@ -95,8 +95,8 @@ const TaskGeneral = (props: {
     if (file.path?.substring(0, 4) === "http") {
       return file.path;
     }
-    if (process.env.NEXT_PUBLIC_ASSET_URL && file.path) {
-      return process.env.NEXT_PUBLIC_ASSET_URL + file.path;
+    if (file.path) {
+      return "/api/file" + file.path;
     }
 
     return "";

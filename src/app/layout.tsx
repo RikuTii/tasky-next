@@ -58,16 +58,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <Head>
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta
-          name="apple-mobile-web-app-status-bar-style"
-          content="black-translucent"
-        />
-        <meta name="msapplication-navbutton-color" content="#25262B" />
-        <meta name="msapplication-TileColor" content="#25262B" />
-        <meta name="theme-color" content="#25262B" />
-      </Head>
       <body className={inter.className}>
         <NextAuthProvider>
           <EmotionProvider>{children}</EmotionProvider>

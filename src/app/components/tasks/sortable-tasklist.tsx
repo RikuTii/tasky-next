@@ -25,7 +25,7 @@ const SortableTaskList = (props: {
   const canDrag = useRef(false);
   const { start, clear } = useTimeout(() => {
     canDrag.current = true;
-  }, 1000);
+  }, 100);
   const taskToRemove = useRef(-1);
   const [taskBeingRemoved, setTaskBeingRemoved] = useState(-1);
 
@@ -187,15 +187,17 @@ const SortableTaskList = (props: {
         key={task.id}
         direction="row"
         w="100%"
-        
         gap="md"
         sx={{
           marginBottom: 8,
-          touchAction: "none",   
+          touchAction: "none",
           alignItems: "center",
           opacity: opacity,
           transformOrigin: "0% 0%",
-          transform: dragStart.current[index] > 0 && dragCurrent[index] > 0 ? transform : "",
+          transform:
+            dragStart.current[index] > 0 && dragCurrent[index] > 0
+              ? transform
+              : "",
           transition: "opacity 1s ease-in-out;",
           overflow: "hidden",
         }}
@@ -205,7 +207,13 @@ const SortableTaskList = (props: {
         <TextInput
           w="100%"
           placeholder=""
-          sx={{touchAction: "none"}}
+          sx={{
+            touchAction: "none",
+            userSelect: "none",
+            msTouchAction: "none",
+            WebkitTouchCallout: "none",
+            msTouchSelect: "none",
+          }}
           ref={(element: HTMLInputElement) =>
             (inputRef.current[index] = element)
           }
@@ -232,7 +240,7 @@ const SortableTaskList = (props: {
           }}
           onPointerUp={(e) => {
             clear();
-            inputRef.current[index].focus();
+            if (!canDrag.current) inputRef.current[index].focus();
           }}
           value={task.title}
           onChange={(event) => {

@@ -12,6 +12,7 @@ import {
   Group,
   Loader,
   Modal,
+  Skeleton,
   Table,
   Text,
   TextInput,
@@ -63,7 +64,7 @@ const TaskLists = ({}) => {
       }),
     });
 
-    if(response.ok) {
+    if (response.ok) {
       loadTaskLists();
       notifications.show({
         title: "Tasklist shared",
@@ -71,11 +72,11 @@ const TaskLists = ({}) => {
       });
     } else {
       notifications.show({
-        title: <p style={{color: "red"}}>Error occured</p>,
+        title: "Error occured",
         message: "Email is not registered to a user",
+        color: "red",
       });
     }
-   
   };
   const removeTaskListShare = async (email: string) => {
     fetch("/api/fetch/tasklist/RemoveShareTaskList", {
@@ -123,14 +124,6 @@ const TaskLists = ({}) => {
     loadTaskLists();
   }, []);
 
-  if (loading) {
-    return (
-      <Center maw={400} h={100} mx="auto">
-        <Loader />
-      </Center>
-    );
-  }
-
   if (
     tasklists === undefined ||
     tasklists === null ||
@@ -140,126 +133,133 @@ const TaskLists = ({}) => {
     return <></>;
 
   return (
-    <Container size="lg">
-      <Title order={2} mb={8}>
-        Manage tasklists
-      </Title>
-      <Table striped highlightOnHover withBorder withColumnBorders>
-        <thead>
-          <tr>
-            <th className="text-light">Title</th>
-            <th className="text-light">Date</th>
-            <th className="text-light">Creator</th>
-            <th className="text-light">Share</th>
-            <th className="text-light">Delete</th>
-          </tr>
-        </thead>
-        <tbody>
-          {tasklists.map((tasklist, index) => (
-            <tr key={tasklist.id}>
-              <td className="text-light">{tasklist.name}</td>
-              <td className="text-light">{formatDate(tasklist.createdDate)}</td>
-              <td className="text-light">
-                {tasklist.creator ? tasklist.creator.username : 0}
-              </td>
-              <td className="text-light">
-                <div
-                  style={{ alignContent: "center", justifyContent: "center" }}
-                  onClick={() => {
-                    setShareList(tasklist);
-                    open();
-                  }}
-                >
-                  {tasklist.creator &&
-                    tasklist.creator.id == session?.user?.id && (
-                      <FontAwesomeIcon icon={faShareNodes} size="2xl" />
-                    )}
-                </div>
-              </td>
-              <td>
-                {index > 0 && (
+    <Skeleton visible={loading}>
+      <Container size="md">
+        <Title order={2} mb={8}>
+          Manage tasklists
+        </Title>
+        <Table striped highlightOnHover withBorder withColumnBorders>
+          <thead>
+            <tr>
+              <th className="text-light">Title</th>
+              <th className="text-light">Date</th>
+              <th className="text-light">Creator</th>
+              <th className="text-light">Share</th>
+              <th className="text-light">Delete</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tasklists.map((tasklist, index) => (
+              <tr key={tasklist.id}>
+                <td className="text-light">{tasklist.name}</td>
+                <td className="text-light">
+                  {formatDate(tasklist.createdDate)}
+                </td>
+                <td className="text-light">
+                  {tasklist.creator ? tasklist.creator.username : 0}
+                </td>
+                <td className="text-light">
                   <div
                     style={{ alignContent: "center", justifyContent: "center" }}
-                    onClick={() => deleteTasklist(tasklist.id)}
+                    onClick={() => {
+                      setShareList(tasklist);
+                      open();
+                    }}
                   >
                     {tasklist.creator &&
                       tasklist.creator.id == session?.user?.id && (
-                        <FontAwesomeIcon
-                          icon={faTrash}
-                          color="red"
-                          size="2xl"
-                        />
+                        <FontAwesomeIcon icon={faShareNodes} size="2xl" />
                       )}
                   </div>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+                </td>
+                <td>
+                  {index > 0 && (
+                    <div
+                      style={{
+                        alignContent: "center",
+                        justifyContent: "center",
+                      }}
+                      onClick={() => deleteTasklist(tasklist.id)}
+                    >
+                      {tasklist.creator &&
+                        tasklist.creator.id == session?.user?.id && (
+                          <FontAwesomeIcon
+                            icon={faTrash}
+                            color="red"
+                            size="2xl"
+                          />
+                        )}
+                    </div>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
 
-      <Modal opened={opened} onClose={close} centered title="Share tasklist">
-        <Box
-          sx={(theme) => ({
-            backgroundColor: theme.colors.dark[6],
-            padding: rem(8),
-          })}
-        >
-          <Box>
-            <Title order={3}>{shareList?.name}</Title>
-            <Divider size="md" my="xs"></Divider>
-            {shareList &&
-              shareList.taskListMetas &&
-              shareList?.taskListMetas.map((meta: TaskListMeta) => {
-                return (
-                  <Grid key={meta.userAccount.id}>
-                    <Grid.Col span={4}>
-                      <Text fw={700}>{meta.userAccount.username}</Text>{" "}
-                    </Grid.Col>
-                    <Grid.Col span={4}>
-                      <Text>{meta.userAccount.email}</Text>
-                    </Grid.Col>
-                    <Grid.Col span={2}>
-                      <CloseButton
-                        size="md"
-                        onClick={() => {
-                          removeTaskListShare(meta.userAccount.email);
-                        }}
-                      ></CloseButton>
-                    </Grid.Col>
-                  </Grid>
-                );
-              })}
-          </Box>
-          <Grid>
-            <Grid.Col>
-              <Text>Email</Text>
-              <TextInput
-                type="email"
-                value={shareEmail}
-                onChange={(event) => {
-                  setShareEmail(event.target.value);
-                }}
-              />
-            </Grid.Col>
-            <Grid.Col>
-              <Group position="right">
-                <Button
-                  sx={{ marginLeft: 8 }}
-                  variant="outline"
-                  onClick={() => {
-                    setShareEmail("");
-                    shareTaskList();
+        <Modal opened={opened} onClose={close} centered title="Share tasklist">
+          <Box
+            sx={(theme) => ({
+              backgroundColor: theme.colors.dark[6],
+              padding: rem(8),
+            })}
+          >
+            <Box>
+              <Title order={3}>{shareList?.name}</Title>
+              <Divider size="md" my="xs"></Divider>
+              {shareList &&
+                shareList.taskListMetas &&
+                shareList?.taskListMetas.map((meta: TaskListMeta) => {
+                  return (
+                    <Grid key={meta.userAccount.id}>
+                      <Grid.Col span={4}>
+                        <Text fw={700}>{meta.userAccount.username}</Text>{" "}
+                      </Grid.Col>
+                      <Grid.Col span={4}>
+                        <Text>{meta.userAccount.email}</Text>
+                      </Grid.Col>
+                      <Grid.Col span={2}>
+                        <CloseButton
+                          size="md"
+                          onClick={() => {
+                            removeTaskListShare(meta.userAccount.email);
+                          }}
+                        ></CloseButton>
+                      </Grid.Col>
+                    </Grid>
+                  );
+                })}
+            </Box>
+            <Grid>
+              <Grid.Col>
+                <Text>Email</Text>
+                <TextInput
+                  type="email"
+                  value={shareEmail}
+                  onChange={(event) => {
+                    setShareEmail(event.target.value);
                   }}
-                >
-                  Share
-                </Button>
-              </Group>
-            </Grid.Col>
-          </Grid>
-        </Box>
-      </Modal>
-    </Container>
+                />
+              </Grid.Col>
+              <Grid.Col>
+                <Group position="right">
+                  <Button
+                    sx={{ marginLeft: 8 }}
+                    variant="outline"
+                    onClick={() => {
+                      setShareEmail("");
+                      shareTaskList();
+                    }}
+                  >
+                    Share
+                  </Button>
+                </Group>
+              </Grid.Col>
+            </Grid>
+          </Box>
+        </Modal>
+      </Container>
+    </Skeleton>
   );
 };
 
