@@ -4,7 +4,6 @@ import "@/globals.css";
 import { useForm } from "@mantine/form";
 import { Box, Group, TextInput, Button, Center, Loader, Title } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { method } from "lodash";
 import { useDisclosure } from "@mantine/hooks";
 
 interface ProfileForm {
@@ -71,7 +70,7 @@ const Profile = ({}) => {
   return (
     <div>
       <Title order={2}>Update profile information</Title>
-      <Box maw={340} mx="auto">
+      <Box maw={600} mx="auto">
         <form onSubmit={form.onSubmit((values) => updateProfile(values))}>
           <TextInput
             sx={{ marginBottom: 8 }}

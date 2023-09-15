@@ -4,14 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useForm } from "@mantine/form";
-import { useOs } from '@mantine/hooks';
-import {
-  Box,
-  Group,
-  TextInput,
-  Button,
-  PasswordInput,
-} from "@mantine/core";
+import { useOs } from "@mantine/hooks";
+import { Box, Group, TextInput, Button, PasswordInput } from "@mantine/core";
 
 interface LoginForm {
   username: string;
@@ -37,7 +31,6 @@ const LoginPage = () => {
     email: string | undefined,
     password: string | undefined
   ) {
-
     await signIn("credentials", {
       email: email,
       password: password,
@@ -62,7 +55,7 @@ const LoginPage = () => {
   }
 
   const onSubmit = (values: LoginForm) => {
-    if(form.validate().hasErrors === false) {
+    if (form.validate().hasErrors === false) {
       setLoading(true);
       submitLogin(values.username, values.password);
     }
@@ -76,12 +69,18 @@ const LoginPage = () => {
           label="Username/email"
           placeholder="Username or email"
           required={true}
+          autoCorrect=""
+          autoCapitalize="none"
+          autoComplete="none"
           {...form.getInputProps("username")}
         />
         <PasswordInput
           label="Password"
           placeholder="Password"
           required={true}
+          autoCorrect=""
+          autoCapitalize="none"
+          autoComplete="none"
           {...form.getInputProps("password")}
         />
         <Group position="right" mt="md">

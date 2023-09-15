@@ -235,6 +235,9 @@ const TaskLists = ({}) => {
                 <Text>Email</Text>
                 <TextInput
                   type="email"
+                  autoCorrect=""
+                  autoCapitalize="none"
+                  autoComplete="none"
                   value={shareEmail}
                   onChange={(event) => {
                     setShareEmail(event.target.value);

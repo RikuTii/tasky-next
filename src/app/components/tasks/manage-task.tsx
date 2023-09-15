@@ -153,58 +153,58 @@ const ManageTask = (props: {
 
   return (
     <Skeleton visible={loading}>
-    <MediaQuery largerThan="sm" styles={{ margin: props.taskId ? 150 : 0 }}>
-      <Container px={props.taskId ? "lg" : ""} fluid>
-        <Flex justify="space-between" align="center">
-          <Title order={3}>{localTask.title}</Title>
-          <CopyButton
-            value={`${process.env.NEXT_PUBLIC_APP_DOMAIN}/tasklist/task/${localTask.id}`}
-            timeout={2000}
-          >
-            {({ copied, copy }) => (
-              <Tooltip
-                label={copied ? "Copied" : "Share"}
-                withArrow
-                position="right"
-              >
-                <ActionIcon color={copied ? "teal" : "gray"} onClick={copy}>
-                  {copied ? (
-                    <FontAwesomeIcon icon={faCheck} color="white" size="sm" />
-                  ) : (
-                    <FontAwesomeIcon icon={faShare} color="white" size="sm" />
-                  )}
-                </ActionIcon>
-              </Tooltip>
-            )}
-          </CopyButton>
-        </Flex>
-        <Grid>
-          <Grid.Col md={6} lg={6}>
-            <TaskGeneral
-              onTaskUpdated={onTaskLocalUpdated}
-              task={localTask}
-              attachments={attachments}
-              onFilesAdded={setAttachments}
-              onFileRemove={removeAttachment}
-              onScheduleChange={onTaskScheduleChange}
-            />
-          </Grid.Col>
-          <Grid.Col md={6} lg={6}>
-            <TimeTrack onTaskUpdated={onTaskLocalUpdated} task={localTask} />
-          </Grid.Col>
-        </Grid>
+      <MediaQuery largerThan="sm" styles={{ margin: props.taskId ? 150 : 0 }}>
+        <Container px={props.taskId ? "lg" : ""} fluid>
+          <Flex justify="space-between" align="center">
+            <Title order={3}>{localTask.title}</Title>
+            <CopyButton
+              value={`${process.env.NEXT_PUBLIC_APP_DOMAIN}/tasklist/task/${localTask.id}`}
+              timeout={2000}
+            >
+              {({ copied, copy }) => (
+                <Tooltip
+                  label={copied ? "Copied" : "Share"}
+                  withArrow
+                  position="right"
+                >
+                  <ActionIcon color={copied ? "teal" : "gray"} onClick={copy}>
+                    {copied ? (
+                      <FontAwesomeIcon icon={faCheck} color="white" size="sm" />
+                    ) : (
+                      <FontAwesomeIcon icon={faShare} color="white" size="sm" />
+                    )}
+                  </ActionIcon>
+                </Tooltip>
+              )}
+            </CopyButton>
+          </Flex>
+          <Grid>
+            <Grid.Col md={6} lg={6}>
+              <TaskGeneral
+                onTaskUpdated={onTaskLocalUpdated}
+                task={localTask}
+                attachments={attachments}
+                onFilesAdded={setAttachments}
+                onFileRemove={removeAttachment}
+                onScheduleChange={onTaskScheduleChange}
+              />
+            </Grid.Col>
+            <Grid.Col md={6} lg={6}>
+              <TimeTrack onTaskUpdated={onTaskLocalUpdated} task={localTask} />
+            </Grid.Col>
+          </Grid>
 
-        <Group position="right" my={8}>
-          <Button
-            variant="gradient"
-            gradient={{ from: "indigo", to: "cyan" }}
-            onClick={saveTaskChanges}
-          >
-            Save changes
-          </Button>
-        </Group>
-      </Container>
-    </MediaQuery>
+          <Group position="right" my={8}>
+            <Button
+              variant="gradient"
+              gradient={{ from: "indigo", to: "cyan" }}
+              onClick={saveTaskChanges}
+            >
+              Save changes
+            </Button>
+          </Group>
+        </Container>
+      </MediaQuery>
     </Skeleton>
   );
 };

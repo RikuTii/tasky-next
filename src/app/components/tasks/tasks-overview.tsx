@@ -15,7 +15,6 @@ import {
   Divider,
   Skeleton,
 } from "@mantine/core";
-import { forEach } from "lodash";
 import { useSession } from "next-auth/react";
 import { useDisclosure } from "@mantine/hooks";
 import ManageTask from "./manage-task";
@@ -46,8 +45,8 @@ const TasksListing = ({}) => {
     let listExists = false;
 
     const tasklist_id = await get("tasklist_id");
-    forEach(data, (taskList: Tasklist) => {
-      if (taskList.id == tasklist_id) {
+    data.forEach((taskList: Tasklist) => {
+      if (taskList.id === tasklist_id) {
         setCurrentTaskList(taskList);
         listExists = true;
       }
@@ -64,8 +63,8 @@ const TasksListing = ({}) => {
     const response = await fetch("/api/fetch/tasklist/Index");
     const data = await response.json();
     setTaskLists(data);
-    forEach(data, (taskList: Tasklist) => {
-      if (taskList.id == id) {
+    data.forEach((taskList: Tasklist) => {
+      if (taskList.id === id) {
         setCurrentTaskList(taskList);
       }
     });
@@ -138,9 +137,11 @@ const TasksListing = ({}) => {
       });
   };
 
-  const setActiveTaskList = (tasklist: Tasklist) => {
-    setCurrentTaskList(tasklist);
-    set("tasklist_id", tasklist.id);
+  const setActiveTaskList = async (tasklist: Tasklist | undefined) => {
+    if (tasklist) {
+      await set("tasklist_id", tasklist.id);
+      setCurrentTaskList(tasklist);
+    }
   };
 
   const doneTasks = tasks?.filter((e) => e.status === TaskStatus.Done);
@@ -193,7 +194,7 @@ const TasksListing = ({}) => {
                     })) ?? []
                   }
                   onChange={(e) =>
-                    setCurrentTaskList(
+                    setActiveTaskList(
                       taskLists?.find((t) => t.id === Number(e))
                     )
                   }

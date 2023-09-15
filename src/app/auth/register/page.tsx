@@ -1,15 +1,9 @@
 "use client";
 import "@/globals.css";
-import {useState } from "react";
-import { useRouter } from 'next/navigation'
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "@mantine/form";
-import {
-  Box,
-  Group,
-  TextInput,
-  Button,
-  PasswordInput,
-} from "@mantine/core";
+import { Box, Group, TextInput, Button, PasswordInput } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 
 interface Registerform {
@@ -20,27 +14,30 @@ interface Registerform {
 
 const RegisterPage = () => {
   const router = useRouter();
-  const [loading, {toggle}] = useDisclosure();
+  const [loading, { toggle }] = useDisclosure();
 
   const form = useForm<Registerform>({
     initialValues: { username: "", email: "", password: "" },
     validate: {
       username: (value) =>
         value.length < 2 ? "Username must have at least 2 letters" : null,
-      email: (value) => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
+      email: (value) => (/^\S+@\S+$/.test(value) ? null : "Invalid email"),
       password: (value) =>
         value.length < 5 ? "Password must have at least 5 letters" : null,
     },
   });
 
-
-  async function submitRegister(email: string | undefined, username: string | undefined, password: string | undefined) {
+  async function submitRegister(
+    email: string | undefined,
+    username: string | undefined,
+    password: string | undefined
+  ) {
     const res = await fetch("/api/user/register", {
       method: "POST",
       body: JSON.stringify({
         email: email,
         username: username,
-        password: password
+        password: password,
       }),
     });
 
@@ -50,17 +47,16 @@ const RegisterPage = () => {
     const data = await res.json();
 
     if (res.status == 400 && data.detail === "error") {
-      if(data.errors['email_taken']) {
+      if (data.errors["email_taken"]) {
         form.setFieldError("email", "Email is already registered");
       }
-      if(data.errors['user_taken']) {
+      if (data.errors["user_taken"]) {
         form.setFieldError("username", "Username is already taken");
       }
-    }
-     else {
+    } else {
       toggle();
       router.push("/");
-     }
+    }
   }
 
   const onSubmit = (values: Registerform) => {
@@ -69,12 +65,15 @@ const RegisterPage = () => {
   };
 
   return (
-       <Box maw={340} mx="auto">
+    <Box maw={340} mx="auto">
       <form onSubmit={form.onSubmit((values) => onSubmit(values))}>
         <TextInput
           sx={{ marginBottom: 8 }}
           label="Username"
           placeholder="Username"
+          autoCorrect=""
+          autoCapitalize="none"
+          autoComplete="none"
           required={true}
           {...form.getInputProps("username")}
         />
@@ -82,6 +81,9 @@ const RegisterPage = () => {
           sx={{ marginBottom: 8 }}
           label="Email"
           placeholder="Email"
+          autoCorrect=""
+          autoCapitalize="none"
+          autoComplete="none"
           required={true}
           {...form.getInputProps("email")}
         />

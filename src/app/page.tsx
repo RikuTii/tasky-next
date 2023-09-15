@@ -146,7 +146,7 @@ export default function Home() {
             </List>
           </Container>
         </Flex>
-        <Center mx="auto" mt={rem(30)}>
+        <Center mx="auto" mt={rem(30)} mb={rem(30)}>
           <Button
             onClick={() => router.push("auth/register")}
             variant="gradient"
