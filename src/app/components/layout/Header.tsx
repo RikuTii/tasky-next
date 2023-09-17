@@ -106,29 +106,34 @@ const HeaderMenu = () => {
   const renderLinks = () => {
     return (
       <MediaQuery smallerThan="sm" styles={{ display: "inline-block" }}>
-        <Box sx={{ display: "flex" }} onClick={() => setShowMenu(false)}>
+        <Box
+          tabIndex={0}
+          sx={{ display: "flex" }}
+          onClick={() => setShowMenu(false)}
+        >
           {status === "authenticated" && (
-            <Link href="/tasklist/manage">
+            <Link tabIndex={0} href="/tasklist/manage">
               <div className={classes.link}>Manage tasklists</div>
             </Link>
           )}
           {status === "authenticated" && (
-            <Link href="/tasklist/create">
+            <Link tabIndex={0} href="/tasklist/create">
               <div className={classes.link}>New tasklist</div>
             </Link>
           )}
           {status === "authenticated" && hideSidebar && (
-            <UnstyledButton className={classes.link}>
+            <UnstyledButton tabIndex={0} className={classes.link}>
               <Link href="/profile">{session.user?.email}</Link>
             </UnstyledButton>
           )}
           {status !== "authenticated" && (
-            <Link href="/auth/register">
+            <Link tabIndex={0} href="/auth/register">
               <div className={classes.link}>Register</div>
             </Link>
           )}
           {status === "authenticated" && (
             <UnstyledButton
+              tabIndex={0}
               className={classes.link}
               onClick={(e) => {
                 e.preventDefault();
@@ -139,7 +144,7 @@ const HeaderMenu = () => {
             </UnstyledButton>
           )}
           {status !== "authenticated" && (
-            <Link href="/auth/login">
+            <Link tabIndex={0} href="/auth/login">
               <div className={classes.link}>Sign in</div>
             </Link>
           )}
@@ -163,13 +168,16 @@ const HeaderMenu = () => {
         </div>
       </MediaQuery>
       <MediaQuery largerThan="sm" styles={{ display: "none" }}>
-        <div ref={ref} style={{ marginRight: 8 }}>
-          <div>
-            <Burger opened={showMenu} onClick={(e) => setShowMenu(!showMenu)} />
-          </div>
+        <div ref={ref} tabIndex={0} style={{ marginRight: 8 }}>
+          <Burger
+            opened={showMenu}
+            tabIndex={0}
+            onClick={(e) => setShowMenu(!showMenu)}
+          />
 
           {showMenu && (
             <Box
+              tabIndex={0}
               sx={{
                 zIndex: 999,
                 position: "absolute",
@@ -179,6 +187,7 @@ const HeaderMenu = () => {
               }}
             >
               <Box
+                tabIndex={0}
                 sx={(theme) => ({
                   background: theme.colors.dark[5],
                   display: "flex",

@@ -3,7 +3,15 @@ import "@/globals.css";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "@mantine/form";
-import { Box, Group, TextInput, Button, PasswordInput } from "@mantine/core";
+import {
+  Box,
+  Group,
+  TextInput,
+  Button,
+  PasswordInput,
+  Container,
+  Center,
+} from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 
 interface Registerform {
@@ -65,41 +73,43 @@ const RegisterPage = () => {
   };
 
   return (
-    <Box maw={340} mx="auto">
-      <form onSubmit={form.onSubmit((values) => onSubmit(values))}>
-        <TextInput
-          sx={{ marginBottom: 8 }}
-          label="Username"
-          placeholder="Username"
-          autoCorrect=""
-          autoCapitalize="none"
-          autoComplete="none"
-          required={true}
-          {...form.getInputProps("username")}
-        />
-        <TextInput
-          sx={{ marginBottom: 8 }}
-          label="Email"
-          placeholder="Email"
-          autoCorrect=""
-          autoCapitalize="none"
-          autoComplete="none"
-          required={true}
-          {...form.getInputProps("email")}
-        />
-        <PasswordInput
-          label="Password"
-          placeholder="Password"
-          required={true}
-          {...form.getInputProps("password")}
-        />
-        <Group position="right" mt="md">
-          <Button loading={loading} type="submit">
-            Register
-          </Button>
-        </Group>
-      </form>
-    </Box>
+    <Center w="100vw" h="400px">
+      <Container w={450} mx="auto">
+        <form onSubmit={form.onSubmit((values) => onSubmit(values))}>
+          <TextInput
+            sx={{ marginBottom: 8 }}
+            label="Username"
+            placeholder="Username"
+            autoCorrect=""
+            autoCapitalize="none"
+            autoComplete="none"
+            required={true}
+            {...form.getInputProps("username")}
+          />
+          <TextInput
+            sx={{ marginBottom: 8 }}
+            label="Email"
+            placeholder="Email"
+            autoCorrect=""
+            autoCapitalize="none"
+            autoComplete="none"
+            required={true}
+            {...form.getInputProps("email")}
+          />
+          <PasswordInput
+            label="Password"
+            placeholder="Password"
+            required={true}
+            {...form.getInputProps("password")}
+          />
+          <Group position="right" mt="md">
+            <Button loading={loading} type="submit">
+              Register
+            </Button>
+          </Group>
+        </form>
+      </Container>
+    </Center>
   );
 };
 

@@ -5,7 +5,15 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useForm } from "@mantine/form";
 import { useOs } from "@mantine/hooks";
-import { Box, Group, TextInput, Button, PasswordInput } from "@mantine/core";
+import {
+  Box,
+  Group,
+  TextInput,
+  Button,
+  PasswordInput,
+  Center,
+  Container,
+} from "@mantine/core";
 
 interface LoginForm {
   username: string;
@@ -31,27 +39,23 @@ const LoginPage = () => {
     email: string | undefined,
     password: string | undefined
   ) {
-    await signIn("credentials", {
+    const response = await signIn("credentials", {
       email: email,
       password: password,
       device: os,
       redirect: false,
       redirectUrl: "/",
-    })
-      .then((response) => {
-        setLoading(false);
-        if (response?.error === "CredentialsSignin") {
-          form.setErrors({
-            username: "Username or password does not match",
-            password: "Username or password does not match",
-          });
-        } else {
-          router.push("/");
-        }
-      })
-      .catch((e) => {
-        console.log(e);
+    });
+
+    setLoading(false);
+    if (response?.error === "CredentialsSignin") {
+      form.setErrors({
+        username: "Username or password does not match",
+        password: "Username or password does not match",
       });
+    } else {
+      router.push("/");
+    }
   }
 
   const onSubmit = (values: LoginForm) => {
@@ -62,34 +66,36 @@ const LoginPage = () => {
   };
 
   return (
-    <Box maw={340} mx="auto">
-      <form onSubmit={form.onSubmit((values) => onSubmit(values))}>
-        <TextInput
-          sx={{ marginBottom: 8 }}
-          label="Username/email"
-          placeholder="Username or email"
-          required={true}
-          autoCorrect=""
-          autoCapitalize="none"
-          autoComplete="none"
-          {...form.getInputProps("username")}
-        />
-        <PasswordInput
-          label="Password"
-          placeholder="Password"
-          required={true}
-          autoCorrect=""
-          autoCapitalize="none"
-          autoComplete="none"
-          {...form.getInputProps("password")}
-        />
-        <Group position="right" mt="md">
-          <Button loading={loading} type="submit">
-            Login
-          </Button>
-        </Group>
-      </form>
-    </Box>
+    <Center w="100vw" h="400px">
+      <Container w={450} mx="auto">
+        <form onSubmit={form.onSubmit((values) => onSubmit(values))}>
+          <TextInput
+            sx={{ marginBottom: 8 }}
+            label="Username/email"
+            placeholder="Username or email"
+            required={true}
+            autoCorrect=""
+            autoCapitalize="none"
+            autoComplete="none"
+            {...form.getInputProps("username")}
+          />
+          <PasswordInput
+            label="Password"
+            placeholder="Password"
+            required={true}
+            autoCorrect=""
+            autoCapitalize="none"
+            autoComplete="none"
+            {...form.getInputProps("password")}
+          />
+          <Group position="right" mt="md">
+            <Button loading={loading} type="submit">
+              Login
+            </Button>
+          </Group>
+        </form>
+      </Container>
+    </Center>
   );
 };
 

@@ -20,6 +20,8 @@ import { useDisclosure } from "@mantine/hooks";
 import ManageTask from "./manage-task";
 import SortableTaskList from "./sortable-tasklist";
 import { set, get } from "idb-keyval";
+import { debounce } from "lodash";
+import { notifications } from "@mantine/notifications";
 
 const TasksListing = ({}) => {
   const { data: session, status, update } = useSession();
@@ -29,6 +31,8 @@ const TasksListing = ({}) => {
   const [tasks, setTasks] = useState<Array<Task>>();
   const [manageTask, setManageTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const latestTask = useRef<Task>({});
 
   const [opened, { open, close }] = useDisclosure(false, {
     onClose: () => setManageTask(null),
@@ -41,33 +45,37 @@ const TasksListing = ({}) => {
 
   const loadTaskLists = async () => {
     const response = await fetch("/api/fetch/tasklist/Index");
-    const data = await response.json();
-    let listExists = false;
+    if (response.ok) {
+      const data = await response.json();
+      let listExists = false;
 
-    const tasklist_id = await get("tasklist_id");
-    data.forEach((taskList: Tasklist) => {
-      if (taskList.id === tasklist_id) {
-        setCurrentTaskList(taskList);
-        listExists = true;
+      const tasklist_id = await get("tasklist_id");
+      data.forEach((taskList: Tasklist) => {
+        if (taskList.id === tasklist_id) {
+          setCurrentTaskList(taskList);
+          listExists = true;
+        }
+      });
+
+      if (!listExists) {
+        setCurrentTaskList(data[0]);
       }
-    });
-
-    if (!listExists) {
-      setCurrentTaskList(data[0]);
+      setLoading(false);
+      setTaskLists(data);
     }
-    setLoading(false);
-    setTaskLists(data);
   };
 
   const refreshTaskLists = async (id: number) => {
     const response = await fetch("/api/fetch/tasklist/Index");
-    const data = await response.json();
-    setTaskLists(data);
-    data.forEach((taskList: Tasklist) => {
-      if (taskList.id === id) {
-        setCurrentTaskList(taskList);
-      }
-    });
+    if (response.ok) {
+      const data = await response.json();
+      setTaskLists(data);
+      data.forEach((taskList: Tasklist) => {
+        if (taskList.id === id) {
+          setCurrentTaskList(taskList);
+        }
+      });
+    }
   };
 
   useEffect(() => {
@@ -83,7 +91,7 @@ const TasksListing = ({}) => {
     }
   }, [currentTaskList]);
 
-  const createNewTask = () => {
+  const createNewTask = async () => {
     let id = 1;
     if (tasks && tasks?.length > 0) {
       tasks.forEach((task: Task) => {
@@ -102,19 +110,20 @@ const TasksListing = ({}) => {
       status: TaskStatus.NotCreated,
       taskList: currentTaskList,
       taskListId: currentTaskList?.id,
+      meta: [],
     };
 
-    onTaskUpdated(newTask);
-
+    latestTask.current = newTask;
     if (tasks) {
       const newTasks = [...tasks];
       newTasks.push(newTask);
       setTasks(newTasks);
     }
+    await onTaskUpdated(newTask, 0, false);
   };
 
-  const onTaskUpdated = async (task: Task, orderId: number = 0) => {
-    fetch("/api/fetch/task/CreateOrUpdateTask", {
+  const onTaskUpdated = async (task: Task, orderId: number = 0, updateTasklist: boolean = false) => {
+    const res = await fetch("/api/fetch/task/CreateOrUpdateTask", {
       method: "POST",
       body: JSON.stringify({
         title: task?.title,
@@ -128,13 +137,25 @@ const TasksListing = ({}) => {
         taskListId: task?.taskListId ?? task?.taskList?.id,
         order_task: orderId ?? 0,
       }),
-    })
-      .then(() => {
-        refreshTaskLists(task?.taskListId ?? task?.taskList?.id ?? 0);
-      })
-      .catch((err) => {
-        console.log(err.message);
+    });
+
+    if (!res.ok) {
+      notifications.show({
+        title: "Error occured",
+        message: "Error updating task",
+        color: "red",
       });
+    } else {
+      const updatedTask: Task = await res.json();
+      if (updatedTask.status !== 0) {
+        const newTasks = [...(tasks ?? []), updatedTask];
+        setTasks(newTasks);
+      }
+
+      if(updateTasklist) {
+        refreshTaskLists(task?.taskListId ?? task?.taskList?.id ?? 0);
+      }
+    }
   };
 
   const setActiveTaskList = async (tasklist: Tasklist | undefined) => {

@@ -79,44 +79,50 @@ const TaskLists = ({}) => {
     }
   };
   const removeTaskListShare = async (email: string) => {
-    fetch("/api/fetch/tasklist/RemoveShareTaskList", {
+    const res = await fetch("/api/fetch/tasklist/RemoveShareTaskList", {
       method: "POST",
       body: JSON.stringify({
         id: shareList?.id,
         email: email,
       }),
-    })
-      .then(() => {
-        loadTaskLists();
-        notifications.show({
-          title: "Tasklist sharing removed",
-          message: "Sharing to " + email + " removed",
-        });
-      })
-      .catch((err) => {
-        console.log(err.message);
+    });
+    if (!res.ok) {
+      notifications.show({
+        title: "Error occured",
+        message: "Error removing tasklist share",
+        color: "red",
       });
+    } else {
+      loadTaskLists();
+      notifications.show({
+        title: "Tasklist sharing removed",
+        message: "Sharing to " + email + " removed",
+      });
+    }
   };
 
   const deleteTasklist = async (id: number | undefined) => {
     if (id === undefined) return;
 
-    fetch("/api/fetch/tasklist/Delete", {
+    const res = await fetch("/api/fetch/tasklist/Delete", {
       method: "POST",
       body: JSON.stringify({
         id: id,
       }),
-    })
-      .then(() => {
-        loadTaskLists();
-        notifications.show({
-          title: "Delete tasklist",
-          message: "Tasklist has been deleted",
-        });
-      })
-      .catch((err) => {
-        console.log(err.message);
+    });
+    if (!res.ok) {
+      notifications.show({
+        title: "Error occured",
+        message: "Error deleting tasklist",
+        color: "red",
       });
+    } else {
+      loadTaskLists();
+      notifications.show({
+        title: "Delete tasklist",
+        message: "Tasklist has been deleted",
+      });
+    }
   };
 
   useEffect(() => {
@@ -212,19 +218,31 @@ const TaskLists = ({}) => {
                 shareList?.taskListMetas.map((meta: TaskListMeta) => {
                   return (
                     <Grid key={meta.userAccount.id}>
-                      <Grid.Col span={4}>
-                        <Text fw={700}>{meta.userAccount.username}</Text>{" "}
+                      <Grid.Col
+                        span={2}
+                        sx={{ textOverflow: "clip", overflow: "clip" }}
+                      >
+                        <Flex align="center" justify="flex-start">
+                          <Text fw={700}>{meta.userAccount.username}</Text>{" "}
+                        </Flex>
                       </Grid.Col>
-                      <Grid.Col span={4}>
-                        <Text>{meta.userAccount.email}</Text>
+                      <Grid.Col
+                        span={8}
+                        sx={{ textOverflow: "clip", overflow: "clip" }}
+                      >
+                        <Flex align="center" justify="center">
+                          <Text>{meta.userAccount.email}</Text>
+                        </Flex>
                       </Grid.Col>
                       <Grid.Col span={2}>
-                        <CloseButton
-                          size="md"
-                          onClick={() => {
-                            removeTaskListShare(meta.userAccount.email);
-                          }}
-                        ></CloseButton>
+                        <Flex align="flex-end" justify="flex-end">
+                          <CloseButton
+                            size="md"
+                            onClick={() => {
+                              removeTaskListShare(meta.userAccount.email);
+                            }}
+                          ></CloseButton>
+                        </Flex>
                       </Grid.Col>
                     </Grid>
                   );

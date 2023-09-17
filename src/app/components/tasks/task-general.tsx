@@ -17,10 +17,18 @@ import {
   CloseButton,
   createStyles,
   useMantineTheme,
+  Container,
 } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { DateTimePicker } from "@mantine/dates";
-import { useDisclosure, useFocusReturn, useFocusTrap, useFocusWithin, useHover, useMediaQuery } from "@mantine/hooks";
+import {
+  useDisclosure,
+  useFocusReturn,
+  useFocusTrap,
+  useFocusWithin,
+  useHover,
+  useMediaQuery,
+} from "@mantine/hooks";
 import { useSession } from "next-auth/react";
 import { retrieveToken } from "@/helpers/fcmtoken";
 
@@ -56,7 +64,7 @@ const useStyles = createStyles((theme) => ({
 
 const TaskGeneral = (props: {
   task: Task;
-  onTaskUpdated: (task: Task) => void;
+  onTaskUpdated: (task: Task, orderId: number, updateList: boolean) => void;
   onFilesAdded: (files: File[]) => void;
   onFileRemove: (taskMeta: TaskMeta) => void;
   onScheduleChange: (date: string) => void;
@@ -74,6 +82,16 @@ const TaskGeneral = (props: {
   const theme = useMantineTheme();
   const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm}`);
 
+  const pointerEventUp = (e: PointerEvent) => {
+    close();
+  };
+
+  useEffect(() => {
+    window.addEventListener("pointerup", pointerEventUp);
+    return () => {
+      window.removeEventListener("pointerup", pointerEventUp);
+    };
+  }, []);
 
   useEffect(() => {
     if (props.task.scheduleDate && scheduleDate === null) {
@@ -83,6 +101,7 @@ const TaskGeneral = (props: {
       );
       setScheduleDate(dtOffset);
     }
+    setShowFileInput(false);
   }, [props.task]);
 
   useEffect(() => {
@@ -125,7 +144,7 @@ const TaskGeneral = (props: {
         value={props.task.title}
         onChange={(event) => {
           const newTask = { ...props.task, title: event.target.value };
-          props.onTaskUpdated(newTask);
+          props.onTaskUpdated(newTask, 0, false);
         }}
       />
 
@@ -135,7 +154,7 @@ const TaskGeneral = (props: {
         value={props.task.description ?? ""}
         onChange={(event) => {
           const newTask = { ...props.task, description: event.target.value };
-          props.onTaskUpdated(newTask);
+          props.onTaskUpdated(newTask, 0, false);
         }}
       />
       <DateTimePicker
@@ -168,12 +187,17 @@ const TaskGeneral = (props: {
         justify={"space-between"}
         align={"center"}
       >
-        <Text>
-          {props.task.meta?.length}{" "}
-          {props.task.meta && props.task.meta.length !== 1
-            ? "attachments"
-            : "attachment"}
-        </Text>
+        {props.task.meta ? (
+          <Text>
+            {props.task.meta?.length}{" "}
+            {props.task.meta && props.task.meta.length !== 1
+              ? "attachments"
+              : "attachment"}
+          </Text>
+        ) : (
+          <Text>0 attachments</Text>
+        )}
+
         <Group position="right">
           <Button
             size="sm"
@@ -205,7 +229,7 @@ const TaskGeneral = (props: {
                       h={0}
                       className={classes.attchDisplayContainer}
                       sx={{
-                        opacity: (hovered || isMobile) ? "1" : "0.0",
+                        opacity: hovered || isMobile ? "1" : "0.0",
                       }}
                     >
                       <CloseButton
@@ -214,11 +238,11 @@ const TaskGeneral = (props: {
                         color="red"
                         variant="filled"
                         onClick={(e) => {
-                          if(hovered || isMobile) {
+                          if (hovered || isMobile) {
                             e.preventDefault();
                             e.stopPropagation();
                             props.onFileRemove(meta);
-                          }                  
+                          }
                         }}
                       />
                     </Box>
@@ -290,9 +314,31 @@ const TaskGeneral = (props: {
         </Flex>
       </ScrollArea>
 
-      <Modal opened={opened} size="auto" onClose={close}>
-        {showFile && <Image src={getAttachmentPath(showFile)} radius="md" />}
-      </Modal>
+      <Modal.Root opened={opened} onClose={close} fullScreen={true}>
+        <Modal.Overlay />
+        <Modal.Content
+          sx={{
+            overflowY: "visible",
+            backgroundColor: "rgba(0,0,0,0)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Flex w="calc(100vw - 2rem)">
+            {showFile && (
+              <Image
+                src={getAttachmentPath(showFile)}
+                onClick={() => close}
+                fit="contain"
+                width="100%"
+                height="700px"
+                radius="md"
+              />
+            )}
+          </Flex>
+        </Modal.Content>
+      </Modal.Root>
     </div>
   );
 };

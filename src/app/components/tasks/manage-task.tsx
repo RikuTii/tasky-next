@@ -26,7 +26,7 @@ import { notifications } from "@mantine/notifications";
 const ManageTask = (props: {
   task: Task | null;
   taskId?: string;
-  onTaskUpdated?: (task: Task) => Promise<void>;
+  onTaskUpdated?: (task: Task, orderId: number, updateTasklist: boolean) => Promise<void>;
 }) => {
   const [localTask, setLocalTask] = useState<Task | null>(null);
   const [unauthorized, setUnauthorized] = useState(false);
@@ -51,7 +51,7 @@ const ManageTask = (props: {
   };
 
   const onTaskUpdated = async (task: Task) => {
-    fetch("/api/fetch/task/CreateOrUpdateTask", {
+    const res = await fetch("/api/fetch/task/CreateOrUpdateTask", {
       method: "POST",
       body: JSON.stringify({
         title: task.title,
@@ -64,13 +64,16 @@ const ManageTask = (props: {
         scheduleDate: task.scheduleDate,
         taskListId: task?.taskListId ?? task?.taskList?.id,
       }),
-    })
-      .then(() => {
-        loadTask();
-      })
-      .catch((err) => {
-        console.log(err.message);
+    });
+    if (!res.ok) {
+      notifications.show({
+        title: "Error occured",
+        message: "Error updating task",
+        color: "red",
       });
+    } else {
+      loadTask();
+    }
   };
 
   useEffect(() => {
@@ -94,7 +97,7 @@ const ManageTask = (props: {
 
   const doTaskUpdate = async () => {
     if (props.onTaskUpdated) {
-      await props.onTaskUpdated(localTask);
+      await props.onTaskUpdated(localTask, 0, true);
     } else {
       await onTaskUpdated(localTask);
     }
@@ -127,18 +130,22 @@ const ManageTask = (props: {
   };
 
   const removeAttachment = async (taskMeta: TaskMeta) => {
-    fetch("/api/fetch/task/RemoveAttachment", {
+    const res = await fetch("/api/fetch/task/RemoveAttachment", {
       method: "POST",
       body: JSON.stringify({
         id: taskMeta.id,
       }),
-    })
-      .then(() => {
-        saveTaskChanges();
-      })
-      .catch((err) => {
-        console.log(err.message);
+    });
+
+    if(!res.ok) {
+      notifications.show({
+        title: "Error occured",
+        message: "Error removing attachment from task",
+        color: "red",
       });
+    } else {
+      saveTaskChanges();
+    }
   };
 
   const saveTaskChanges = async () => {
