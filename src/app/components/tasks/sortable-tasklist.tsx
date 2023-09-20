@@ -1,8 +1,15 @@
 import React, { useEffect, useState, useCallback, useRef } from "react";
-import { useMediaQuery, useTimeout } from "@mantine/hooks";
+import { useMediaQuery, useTimeout, useWindowScroll } from "@mantine/hooks";
 import { List } from "react-movable";
 import { Task, TaskStatus } from "@/types/tasks.d";
-import { Flex, TextInput, ThemeIcon, UnstyledButton, rem } from "@mantine/core";
+import {
+  Flex,
+  TextInput,
+  ThemeIcon,
+  UnstyledButton,
+  createStyles,
+  rem,
+} from "@mantine/core";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCheck,
@@ -11,6 +18,12 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { debounce } from "lodash";
 import { notifications } from "@mantine/notifications";
+
+const useStyles = createStyles((theme) => ({
+  input: {
+    backgroundColor: theme.colors.dark[8],
+  },
+}));
 
 const SortableTaskList = (props: {
   tasks: Array<Task> | undefined;
@@ -25,10 +38,13 @@ const SortableTaskList = (props: {
 
   const dragStart = useRef<Array<number>>([]);
   const lastDragDistance = useRef(0);
+
   const taskToRemove = useRef(-1);
   const activeDragIndex = useRef(0);
   const inputRef = useRef(new Array<HTMLInputElement>());
   const canDrag = useRef(false);
+
+  const { classes } = useStyles();
 
   const isTouchScreen = useMediaQuery("(hover: none) and (pointer:coarse)");
 
@@ -87,6 +103,7 @@ const SortableTaskList = (props: {
       clear();
     }
   };
+
   const pointerEventMove = (e: PointerEvent) => {
     if (dragStart.current[activeDragIndex.current] > 0 && canDrag.current) {
       const copyArray = [...dragCurrent];
@@ -97,13 +114,23 @@ const SortableTaskList = (props: {
     }
   };
 
+  const touchEventEnd = (e: TouchEvent) => {
+    inputRef.current.forEach((elem) => {
+      if (elem && elem.disabled) {
+        elem.disabled = false;
+      }
+    });
+  };
+
   useEffect(() => {
     window.addEventListener("pointerup", pointerEventUp);
     window.addEventListener("pointermove", pointerEventMove);
+    window.addEventListener("touchend", touchEventEnd);
 
     return () => {
       window.removeEventListener("pointerup", pointerEventUp);
       window.removeEventListener("pointermove", pointerEventMove);
+      window.removeEventListener("touchend", touchEventEnd);
     };
   }, []);
 
@@ -114,7 +141,9 @@ const SortableTaskList = (props: {
       props.tasks?.map((item) => (
         <input
           key={item.id}
-          ref={(element: HTMLInputElement) => inputRef.current.push(element)}
+          ref={(element: HTMLInputElement) => {
+            inputRef.current.push(element);
+          }}
         >
           {item.id}
         </input>
@@ -123,7 +152,7 @@ const SortableTaskList = (props: {
   }, [props.tasks]);
 
   const delayedTaskUpdate = useCallback(
-    debounce((q: Task) => props.onTaskUpdated(q, 0 ,false), 1000),
+    debounce((q: Task) => props.onTaskUpdated(q, 0, false), 1000),
     []
   );
   const removeTask = async (task: Task) => {
@@ -205,7 +234,7 @@ const SortableTaskList = (props: {
         gap="md"
         sx={{
           marginBottom: 8,
-          touchAction: "none",
+          touchAction: "pan-y",
           alignItems: "center",
           opacity: opacity,
           transformOrigin: "0% 0%",
@@ -223,12 +252,19 @@ const SortableTaskList = (props: {
           w="100%"
           placeholder=""
           tabIndex={0}
+          autoFocus={task.status === TaskStatus.NotCreated}
+          classNames={{
+            input: task.status === TaskStatus.Done ? classes.input : "",
+          }}
           sx={{
-            touchAction: "none",
             userSelect: "none",
             msTouchAction: "none",
             WebkitTouchCallout: "none",
             msTouchSelect: "none",
+            textDecorationLine:
+              task.status === TaskStatus.Done ? "line-through" : "",
+            textDecorationThickness: 1,
+            textDecorationColor: "white",
           }}
           onContextMenu={(e) => {
             e.preventDefault();
