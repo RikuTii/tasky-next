@@ -20,7 +20,6 @@ import { useDisclosure } from "@mantine/hooks";
 import ManageTask from "./manage-task";
 import SortableTaskList from "./sortable-tasklist";
 import { set, get } from "idb-keyval";
-import { debounce } from "lodash";
 import { notifications } from "@mantine/notifications";
 
 const TasksListing = ({}) => {
@@ -31,6 +30,7 @@ const TasksListing = ({}) => {
   const [tasks, setTasks] = useState<Array<Task>>();
   const [manageTask, setManageTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadingTaskList, setLoadingTasklist] = useState(true);
 
   const latestTask = useRef<Task>({});
 
@@ -48,7 +48,6 @@ const TasksListing = ({}) => {
     if (response.ok) {
       const data = await response.json();
       let listExists = false;
-
       const tasklist_id = await get("tasklist_id");
       data.forEach((taskList: Tasklist) => {
         if (taskList.id === tasklist_id) {
@@ -60,36 +59,67 @@ const TasksListing = ({}) => {
       if (!listExists) {
         setCurrentTaskList(data[0]);
       }
+      setLoadingTasklist(false);
       setLoading(false);
       setTaskLists(data);
     }
   };
 
-  const refreshTaskLists = async (id: number) => {
-    const response = await fetch("/api/fetch/tasklist/Index");
+  const refreshTaskList = async (
+    id: number,
+    signal?: AbortSignal
+  ): Promise<Task[]> => {
+    const response = await fetch(`/api/fetch/tasklist/GetTaskList/${id}`, {
+      signal,
+    });
     if (response.ok) {
-      const data = await response.json();
-      setTaskLists(data);
-      data.forEach((taskList: Tasklist) => {
-        if (taskList.id === id) {
-          setCurrentTaskList(taskList);
-        }
-      });
+      let tasks: Task[] = [];
+      const updatedList: Tasklist = await response.json();
+      if (taskLists) {
+        taskLists.forEach((taskList: Tasklist) => {
+          if (taskList.id === updatedList.id) {
+            setCurrentTaskList(updatedList);
+            const newTaskLists = [...taskLists];
+            const list = newTaskLists.find((e) => e.id === updatedList.id);
+            if (list) {
+              list.tasks = updatedList.tasks;
+              setTaskLists(newTaskLists);
+              tasks = updatedList.tasks ?? [];
+            }
+          }
+        });
+      }
+      setLoadingTasklist(false);
+      return tasks;
     }
+
+    return [];
   };
 
-  useEffect(() => {
-    setTasks(currentTaskList?.tasks);
-    if (currentTaskList && currentTaskList.tasks) {
+  const refreshTasklistTasks = async (id: number, signal?: AbortSignal) => {
+    const tasks = await refreshTaskList(id, signal);
+    setTasks(tasks);
+    if (currentTaskList && tasks) {
       if (manageTask) {
-        currentTaskList.tasks.forEach((task: Task) => {
+        tasks.forEach((task: Task) => {
           if (task.id === manageTask.id) {
             setManageTask({ ...task });
           }
         });
       }
     }
-  }, [currentTaskList]);
+  };
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    if (currentTaskList?.id) {
+      setLoadingTasklist(true);
+      refreshTasklistTasks(currentTaskList.id, signal);
+    }
+
+    return () => controller.abort();
+  }, [currentTaskList?.id]);
 
   const createNewTask = async () => {
     let id = 1;
@@ -122,7 +152,11 @@ const TasksListing = ({}) => {
     await onTaskUpdated(newTask, 0, false);
   };
 
-  const onTaskUpdated = async (task: Task, orderId: number = 0, updateTasklist: boolean = false) => {
+  const onTaskUpdated = async (
+    task: Task,
+    orderId: number = 0,
+    updateTasklist: boolean = false
+  ) => {
     const res = await fetch("/api/fetch/task/CreateOrUpdateTask", {
       method: "POST",
       body: JSON.stringify({
@@ -152,8 +186,9 @@ const TasksListing = ({}) => {
         setTasks(newTasks);
       }
 
-      if(updateTasklist) {
-        refreshTaskLists(task?.taskListId ?? task?.taskList?.id ?? 0);
+      if (updateTasklist) {
+        setLoadingTasklist(true);
+        refreshTasklistTasks(task?.taskListId ?? task?.taskList?.id ?? 0);
       }
     }
   };
@@ -171,96 +206,105 @@ const TasksListing = ({}) => {
 
   return (
     <Skeleton visible={loading}>
-      <Container mih={400} w={800} fluid p={0}>
-        <Divider size="md" my="xs" />
-        <Flex direction={"row"} pl={0}>
-          <MediaQuery smallerThan="sm" styles={{ display: "none" }}>
-            <Box w="50%">
-              <Container
-                px="lg"
-                fluid
-                sx={(theme) => ({
-                  borderRightColor: theme.colors.dark[4],
-                  borderRightWidth: rem(2),
-                  borderRightStyle: "solid",
-                })}
-              >
-                <Divider size="xs" my="xs" />
-                {taskLists?.map((tasklist: Tasklist) => {
-                  return (
-                    <NavLink
-                      key={"nav" + tasklist.id}
-                      label={tasklist.name}
-                      active={tasklist.id === currentTaskList?.id}
-                      onClick={(e) => setActiveTaskList(tasklist)}
-                    />
-                  );
-                })}
-              </Container>
-            </Box>
-          </MediaQuery>
-          <MediaQuery
-            smallerThan="sm"
-            styles={{ width: "100%", marginLeft: 0 }}
-          >
-            <Box w="50%" sx={{ overflow: "clip" }} ml={rem(8)}>
-              <MediaQuery largerThan="sm" styles={{ display: "none" }}>
-                <Select
-                  style={{ marginBottom: 8 }}
-                  value={String(currentTaskList?.id)}
-                  data={
-                    taskLists?.map((tasklist: Tasklist) => ({
-                      value: String(tasklist.id),
-                      label: tasklist.name ?? "",
-                    })) ?? []
-                  }
-                  onChange={(e) =>
-                    setActiveTaskList(
-                      taskLists?.find((t) => t.id === Number(e))
-                    )
-                  }
-                />
-              </MediaQuery>
-
-              <SortableTaskList
-                tasks={tasks}
-                tasklistId={currentTaskList?.id}
-                setTasks={setTasks}
-                onTaskUpdated={onTaskUpdated}
-                refreshTaskLists={refreshTaskLists}
-                setManageTask={(task: Task) => {
-                  setManageTask(task);
-                  open();
-                }}
-              />
-
-              <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                <Button
-                  sx={{ marginTop: 8 }}
-                  variant="gradient"
-                  gradient={{ from: "indigo", to: "cyan" }}
-                  onClick={createNewTask}
+      <MediaQuery largerThan="md" styles={{ width: 800 }}>
+        <Container mih={400} w="80vw" fluid p={0}>
+          <Divider size="md" my="xs" />
+          <Flex direction={"row"} pl={0}>
+            <MediaQuery smallerThan="sm" styles={{ display: "none" }}>
+              <Box w="50%">
+                <Container
+                  px="lg"
+                  fluid
+                  sx={(theme) => ({
+                    borderRightColor: theme.colors.dark[4],
+                    borderRightWidth: rem(2),
+                    borderRightStyle: "solid",
+                  })}
                 >
-                  New
-                </Button>
+                  <Divider size="xs" my="xs" />
+                  {taskLists?.map((tasklist: Tasklist) => {
+                    return (
+                      <NavLink
+                        key={"nav" + tasklist.id}
+                        label={tasklist.name}
+                        active={tasklist.id === currentTaskList?.id}
+                        onClick={(e) => setActiveTaskList(tasklist)}
+                      />
+                    );
+                  })}
+                </Container>
               </Box>
+            </MediaQuery>
+            <MediaQuery
+              smallerThan="sm"
+              styles={{ width: "100%", marginLeft: 0 }}
+            >
+              <Box w="50%" sx={{ overflow: "clip" }} ml={rem(8)}>
+                <MediaQuery largerThan="sm" styles={{ display: "none" }}>
+                  <Select
+                    style={{ marginBottom: 8 }}
+                    value={String(currentTaskList?.id)}
+                    data={
+                      taskLists?.map((tasklist: Tasklist) => ({
+                        value: String(tasklist.id),
+                        label: tasklist.name ?? "",
+                      })) ?? []
+                    }
+                    onChange={(e) =>
+                      setActiveTaskList(
+                        taskLists?.find((t) => t.id === Number(e))
+                      )
+                    }
+                  />
+                </MediaQuery>
+
+                <Skeleton
+                  visible={loadingTaskList}
+                  height={tasks && tasks?.length > 0 ? "auto" : 600}
+                  p={rem(4)}
+                >
+                  <SortableTaskList
+                    tasks={tasks}
+                    tasklistId={currentTaskList?.id}
+                    setTasks={setTasks}
+                    onTaskUpdated={onTaskUpdated}
+                    createNewTask={createNewTask}
+                    refreshTaskLists={refreshTasklistTasks}
+                    setManageTask={(task: Task) => {
+                      setManageTask(task);
+                      open();
+                    }}
+                  />
+                </Skeleton>
+
+                <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                  <Button
+                    sx={{ marginTop: 8 }}
+                    variant="gradient"
+                    gradient={{ from: "indigo", to: "cyan" }}
+                    onClick={createNewTask}
+                  >
+                    New
+                  </Button>
+                </Box>
+              </Box>
+            </MediaQuery>
+          </Flex>
+          <Modal opened={opened} onClose={close} title="Manage task" size="xl">
+            <Box
+              sx={(theme) => ({
+                backgroundColor: theme.colors.dark[6],
+                padding: rem(8),
+              })}
+            >
+              <ManageTask
+                task={manageTask}
+                onTaskUpdated={onTaskUpdated}
+              ></ManageTask>
             </Box>
-          </MediaQuery>
-        </Flex>
-        <Modal opened={opened} onClose={close} title="Manage task" size="xl">
-          <Box
-            sx={(theme) => ({
-              backgroundColor: theme.colors.dark[6],
-              padding: rem(8),
-            })}
-          >
-            <ManageTask
-              task={manageTask}
-              onTaskUpdated={onTaskUpdated}
-            ></ManageTask>
-          </Box>
-        </Modal>
-      </Container>
+          </Modal>
+        </Container>
+      </MediaQuery>
     </Skeleton>
   );
 };

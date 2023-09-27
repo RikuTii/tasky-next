@@ -20,6 +20,11 @@ export const metadata: Metadata = {
   description: APP_DESCRIPTION,
   manifest: "/manifest.json",
   themeColor: "#25262B",
+  viewport: {
+    width: "device-width",
+    initialScale: 1.0,
+    maximumScale: 1.0
+  },
   colorScheme: "dark",
   appleWebApp: {
     capable: true,

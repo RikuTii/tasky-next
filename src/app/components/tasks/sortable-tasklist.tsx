@@ -32,9 +32,11 @@ const SortableTaskList = (props: {
   onTaskUpdated: (task: Task, orderId: number, updateTasklist: boolean) => void;
   setManageTask: (task: Task) => void;
   refreshTaskLists: (id: number) => void;
+  createNewTask: () => void;
 }) => {
   const [dragCurrent, setDragCurrent] = useState<Array<number>>([]);
   const [taskBeingRemoved, setTaskBeingRemoved] = useState(-1);
+  const autoFocusId = useRef(-1);
 
   const dragStart = useRef<Array<number>>([]);
   const lastDragDistance = useRef(0);
@@ -54,7 +56,7 @@ const SortableTaskList = (props: {
 
   const { start: removeStart, clear: removeEnd } = useTimeout(
     () => onTaskRemoved(),
-    1000
+    500
   );
 
   const onTaskRemoved = () => {
@@ -118,6 +120,12 @@ const SortableTaskList = (props: {
     inputRef.current.forEach((elem) => {
       if (elem && elem.disabled) {
         elem.disabled = false;
+        const copyArray = [...dragCurrent];
+        copyArray.forEach((element, index) => {
+          copyArray[index] = 0;
+          dragStart.current[index] = 0;
+        });
+        setDragCurrent(copyArray);
       }
     });
   };
@@ -148,6 +156,20 @@ const SortableTaskList = (props: {
           {item.id}
         </input>
       ));
+    }
+  }, [props.tasks]);
+
+  useEffect(() => {
+    const lastTask = props.tasks?.slice(-1);
+    if (lastTask && lastTask[0]) {
+      const id = lastTask[0].id;
+      if (lastTask[0].status === TaskStatus.NotCreated && id) {
+        if (props.tasks?.length) {
+          autoFocusId.current = props.tasks?.length - 1;
+        }
+      } else {
+        autoFocusId.current = -1;
+      }
     }
   }, [props.tasks]);
 
@@ -222,6 +244,9 @@ const SortableTaskList = (props: {
   };
 
   const renderSingleTask = (task: Task, index: number = 0) => {
+    if (autoFocusId.current === index && document.activeElement !== inputRef.current[index]) {
+      inputRef.current[index].focus();
+    }
     const opacity = taskBeingRemoved === task.id ? "0.0" : "1.0";
     const transform = `translateX(${
       dragCurrent[index] - dragStart.current[index]
@@ -242,7 +267,7 @@ const SortableTaskList = (props: {
             dragStart.current[index] > 0 && dragCurrent[index] > 0
               ? transform
               : "",
-          transition: "opacity 1s ease-in-out;",
+          transition: "opacity 0.5s ease-in-out;",
           overflow: "hidden",
         }}
       >
@@ -252,27 +277,30 @@ const SortableTaskList = (props: {
           w="100%"
           placeholder=""
           tabIndex={0}
-          autoFocus={task.status === TaskStatus.NotCreated}
+          autoFocus={index === autoFocusId.current}
           classNames={{
             input: task.status === TaskStatus.Done ? classes.input : "",
           }}
           sx={{
-            userSelect: "none",
-            msTouchAction: "none",
-            WebkitTouchCallout: "none",
-            msTouchSelect: "none",
             textDecorationLine:
               task.status === TaskStatus.Done ? "line-through" : "",
             textDecorationThickness: 1,
             textDecorationColor: "white",
           }}
           onContextMenu={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
+            if (document.activeElement !== inputRef.current[index]) {
+              e.preventDefault();
+              e.stopPropagation();
+            }
           }}
           ref={(element: HTMLInputElement) =>
             (inputRef.current[index] = element)
           }
+          onKeyUp={(e) => {
+            if (e.code === "Enter") {
+              props.createNewTask();
+            }
+          }}
           rightSection={
             <UnstyledButton
               onClick={() => {
@@ -303,13 +331,15 @@ const SortableTaskList = (props: {
             </UnstyledButton>
           }
           onPointerDown={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            dragStart.current[index] = e.clientX;
-            activeDragIndex.current = index;
-            taskToRemove.current = task.id ?? -1;
-            start();
-            if (isTouchScreen) inputRef.current[index].disabled = true;
+            if (document.activeElement !== inputRef.current[index]) {
+              e.stopPropagation();
+              e.preventDefault();
+              dragStart.current[index] = e.clientX;
+              activeDragIndex.current = index;
+              taskToRemove.current = task.id ?? -1;
+              start();
+              if (isTouchScreen) inputRef.current[index].disabled = true;
+            }
           }}
           onPointerUp={(e) => {
             clear();
@@ -367,10 +397,12 @@ const SortableTaskList = (props: {
     );
   };
 
+  if (!props.tasks || !props.tasks.length) return <></>;
+
   return (
     <>
       <List
-        values={props.tasks ?? []}
+        values={props.tasks}
         onChange={onDragEnd}
         renderList={({ children, props }) => <div {...props}>{children}</div>}
         renderItem={({ value, props, index }: any) => (
