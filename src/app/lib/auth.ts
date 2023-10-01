@@ -21,8 +21,6 @@ const connection: DataSourceOptions = {
 
 const db_adapter: any = TypeORMAdapter(connection);
 
-// For more information on each option (and a full list of options) go to
-// https://next-auth.js.org/configuration/options
 export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
@@ -53,7 +51,6 @@ export const authOptions: NextAuthOptions = {
         const res = await fetch(process.env.API_URL + "Login", {
           method: "POST",
           headers: { "Content-type": "application/json; charset=UTF-8" },
-
           body: JSON.stringify(loginUser),
         });
 
@@ -79,8 +76,7 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     async jwt({ token, user, account, session, trigger }: any) {
-      token.userRole = "admin";
-      if(trigger === 'update') {
+      if (trigger === "update") {
         token.fcmToken = session.fcmToken;
       }
       if (user) {
@@ -92,7 +88,6 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token, user }: any) {
-
       if (token) {
         session.user.email = token.email;
         session.user.username = token.userName;

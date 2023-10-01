@@ -16,6 +16,7 @@ import {
   Table,
   Text,
   TextInput,
+  Textarea,
   Title,
   rem,
 } from "@mantine/core";
@@ -34,7 +35,7 @@ import { formatDate } from "@/helpers/timedateformat";
 const TaskLists = ({}) => {
   const { data: session, status } = useSession();
   const [tasklists, setTaskLists] = useState<Tasklist[] | null>(null);
-  const [shareList, setShareList] = useState<Tasklist | null>(null);
+  const [editList, setEditList] = useState<Tasklist | null>(null);
   const [loading, setLoading] = useState(false);
   const [opened, { open, close }] = useDisclosure(false, {
     onClose: () => setShareEmail(""),
@@ -46,11 +47,36 @@ const TaskLists = ({}) => {
     const data = await response.json();
     setTaskLists(data);
     setLoading(false);
-    if (shareList) {
+    if (editList) {
       data.forEach((list: Tasklist) => {
-        if (list.id == shareList.id) {
-          setShareList(list);
+        if (list.id == editList.id) {
+          setEditList(list);
         }
+      });
+    }
+  };
+
+  const updateTaskList = async () => {
+    const response = await fetch("/api/fetch/tasklist/UpdateTaskList", {
+      method: "POST",
+      body: JSON.stringify({
+        id: editList?.id,
+        name: editList?.name,
+        description: editList?.description,
+      }),
+    });
+
+    if (response.ok) {
+      loadTaskLists();
+      notifications.show({
+        title: "Tasklist updated",
+        message: `${editList?.name} has been updated`,
+      });
+    } else {
+      notifications.show({
+        title: "Error occured",
+        message: "Error updating tasklist",
+        color: "red",
       });
     }
   };
@@ -59,7 +85,7 @@ const TaskLists = ({}) => {
     const response = await fetch("/api/fetch/tasklist/ShareTaskList", {
       method: "POST",
       body: JSON.stringify({
-        id: shareList?.id,
+        id: editList?.id,
         email: shareEmail,
       }),
     });
@@ -82,7 +108,7 @@ const TaskLists = ({}) => {
     const res = await fetch("/api/fetch/tasklist/RemoveShareTaskList", {
       method: "POST",
       body: JSON.stringify({
-        id: shareList?.id,
+        id: editList?.id,
         email: email,
       }),
     });
@@ -140,7 +166,7 @@ const TaskLists = ({}) => {
 
   return (
     <Skeleton visible={loading}>
-      <Container size="md">
+      <Container size="md" p={rem(8)}>
         <Title order={2} mb={8}>
           Manage tasklists
         </Title>
@@ -157,7 +183,20 @@ const TaskLists = ({}) => {
           <tbody>
             {tasklists.map((tasklist, index) => (
               <tr key={tasklist.id}>
-                <td className="text-light">{tasklist.name}</td>
+                <td
+                  className="text-light"
+                  onClick={() => {
+                    if (
+                      tasklist.creator &&
+                      tasklist.creator.id == session?.user?.id
+                    ) {
+                      setEditList(tasklist);
+                      open();
+                    }
+                  }}
+                >
+                  {tasklist.name}
+                </td>
                 <td className="text-light">
                   {formatDate(tasklist.createdDate)}
                 </td>
@@ -168,8 +207,13 @@ const TaskLists = ({}) => {
                   <div
                     style={{ alignContent: "center", justifyContent: "center" }}
                     onClick={() => {
-                      setShareList(tasklist);
-                      open();
+                      if (
+                        tasklist.creator &&
+                        tasklist.creator.id == session?.user?.id
+                      ) {
+                        setEditList(tasklist);
+                        open();
+                      }
                     }}
                   >
                     {tasklist.creator &&
@@ -203,7 +247,7 @@ const TaskLists = ({}) => {
           </tbody>
         </Table>
 
-        <Modal opened={opened} onClose={close} centered title="Share tasklist">
+        <Modal opened={opened} onClose={close} centered title="Edit tasklist">
           <Box
             sx={(theme) => ({
               backgroundColor: theme.colors.dark[6],
@@ -211,11 +255,34 @@ const TaskLists = ({}) => {
             })}
           >
             <Box>
-              <Title order={3}>{shareList?.name}</Title>
+              <Title order={3}>{editList?.name}</Title>
               <Divider size="md" my="xs"></Divider>
-              {shareList &&
-                shareList.taskListMetas &&
-                shareList?.taskListMetas.map((meta: TaskListMeta) => {
+
+              <TextInput
+                placeholder=""
+                label="Name"
+                value={editList?.name}
+                onChange={(event) => {
+                  const newList = { ...editList, name: event.target.value };
+                  setEditList(newList);
+                }}
+              />
+              <Textarea
+                placeholder="Description"
+                label="Description"
+                value={editList?.description}
+                onChange={(event) => {
+                  const newList = {
+                    ...editList,
+                    description: event.target.value,
+                  };
+                  setEditList(newList);
+                }}
+              />
+              <Divider size="md" my="xs"></Divider>
+              {editList &&
+                editList.taskListMetas &&
+                editList?.taskListMetas.map((meta: TaskListMeta) => {
                   return (
                     <Grid key={meta.userAccount.id}>
                       <Grid.Col
@@ -264,16 +331,29 @@ const TaskLists = ({}) => {
               </Grid.Col>
               <Grid.Col>
                 <Group position="right">
-                  <Button
-                    sx={{ marginLeft: 8 }}
-                    variant="outline"
-                    onClick={() => {
-                      setShareEmail("");
-                      shareTaskList();
-                    }}
-                  >
-                    Share
-                  </Button>
+                  <Flex direction="column" gap={rem(28)}>
+                    <Button
+                      size="xs"
+                      sx={{ marginLeft: 8 }}
+                      variant="outline"
+                      onClick={() => {
+                        setShareEmail("");
+                        shareTaskList();
+                      }}
+                    >
+                      Share
+                    </Button>
+                    <Button
+                      sx={{ marginLeft: 8 }}
+                      variant="gradient"
+                      onClick={() => {
+                        setShareEmail("");
+                        updateTaskList();
+                      }}
+                    >
+                      Save changes
+                    </Button>
+                  </Flex>
                 </Group>
               </Grid.Col>
             </Grid>

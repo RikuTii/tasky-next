@@ -35,8 +35,9 @@ export default function EmotionProvider({
       const messaging = getMessaging(fireBaseApp);
       const unsubscribe = onMessage(messaging, (payload) => {
         notifications.show({
-          title: payload.notification?.title,
-          message: payload.notification?.body,
+          title: payload.data?.title,
+          message: payload.data?.body,
+          autoClose: false,
         });
       });
       return () => {

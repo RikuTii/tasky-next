@@ -59,6 +59,18 @@ const SortableTaskList = (props: {
     500
   );
 
+  const endActiveDrag = () => {
+    const copyArray = [...dragCurrent];
+    copyArray.forEach((element, index) => {
+      copyArray[index] = 0;
+      dragStart.current[index] = 0;
+    });
+    canDrag.current = false;
+    setDragCurrent(copyArray);
+    activeDragIndex.current = 0;
+    clear();
+  }
+
   const onTaskRemoved = () => {
     const task = props.tasks?.find((e) => e.id === taskToRemove.current);
     if (task) {
@@ -74,15 +86,7 @@ const SortableTaskList = (props: {
       props.setTasks(copytask);
     }
 
-    const copyArray = [...dragCurrent];
-    copyArray.forEach((element, index) => {
-      copyArray[index] = 0;
-      dragStart.current[index] = 0;
-    });
-    canDrag.current = false;
-    setDragCurrent(copyArray);
-    activeDragIndex.current = 0;
-    clear();
+    endActiveDrag();
   };
 
   const pointerEventUp = () => {
@@ -91,18 +95,9 @@ const SortableTaskList = (props: {
         canDrag.current = false;
         setTaskBeingRemoved(taskToRemove.current);
         removeStart();
-        return;
+      } else {
+        endActiveDrag();
       }
-
-      const copyArray = [...dragCurrent];
-      copyArray.forEach((element, index) => {
-        copyArray[index] = 0;
-        dragStart.current[index] = 0;
-      });
-      canDrag.current = false;
-      setDragCurrent(copyArray);
-      activeDragIndex.current = 0;
-      clear();
     }
   };
 
@@ -118,15 +113,12 @@ const SortableTaskList = (props: {
 
   const touchEventEnd = (e: TouchEvent) => {
     inputRef.current.forEach((elem) => {
-      if (elem && elem.disabled) {
+      if (elem) {
         elem.disabled = false;
-        const copyArray = [...dragCurrent];
-        copyArray.forEach((element, index) => {
-          copyArray[index] = 0;
-          dragStart.current[index] = 0;
-        });
-        setDragCurrent(copyArray);
       }
+      canDrag.current = false;
+      activeDragIndex.current = 0;
+      clear();
     });
   };
 
@@ -264,7 +256,7 @@ const SortableTaskList = (props: {
           opacity: opacity,
           transformOrigin: "0% 0%",
           transform:
-            dragStart.current[index] > 0 && dragCurrent[index] > 0
+            dragStart.current[index] > 0 && dragCurrent[index] > 0 || taskBeingRemoved === task.id 
               ? transform
               : "",
           transition: "opacity 0.5s ease-in-out;",

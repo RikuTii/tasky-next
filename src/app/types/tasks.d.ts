@@ -10,6 +10,7 @@ export type Tasklist = {
     name?: string;
     createdDate?: string;
     creator?: User;
+    description?: string;
     taskListMetas?: TaskListMeta[];
     tasks?: Task[];
   };

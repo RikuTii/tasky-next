@@ -31,6 +31,7 @@ import {
 } from "@mantine/hooks";
 import { useSession } from "next-auth/react";
 import { retrieveToken } from "@/helpers/fcmtoken";
+import { useRouter } from "next/navigation";
 
 const useStyles = createStyles((theme) => ({
   attchDisplay: {
@@ -75,6 +76,7 @@ const TaskGeneral = (props: {
   const [scheduleDate, setScheduleDate] = useState<Date | null>(null);
   const { data, update } = useSession();
   const { classes } = useStyles();
+  const router = useRouter();
   const [opened, { open, close }] = useDisclosure(false, {
     onClose: () => setShowFile(null),
   });
@@ -125,13 +127,18 @@ const TaskGeneral = (props: {
     if (data?.user?.fcmToken === "pending") {
       const token = await retrieveToken();
       if (token !== "") {
-        update({ fcmToken: token });
-        fetch("/api/fetch/UpdateDevice", {
+        const response = await fetch("/api/fetch/UpdateDevice", {
           method: "POST",
           body: JSON.stringify({
             fcmToken: token,
           }),
         });
+        if (response.ok) {
+          router.push(
+            `${process.env.NEXT_PUBLIC_APP_DOMAIN}/tasklist/task/${props.task.id}`
+          );
+          update({ fcmToken: token });
+        }
       }
     }
   };
