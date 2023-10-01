@@ -5,10 +5,8 @@ import { authOptions } from "@/lib/auth";
 
 export default async function Create({}) {
   return (
-    <main className={styles.main}>
-      <div>
-        <CreateTaskList />
-      </div>
-    </main>
+    <div>
+      <CreateTaskList />
+    </div>
   );
 }

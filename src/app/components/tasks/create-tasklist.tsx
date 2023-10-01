@@ -51,29 +51,27 @@ const CreateTaskList = ({}) => {
   };
 
   return (
-    <Center w="100vw" h="400px">
-      <Container w={450} mx="auto">
-        <Title order={2}>Create new tasklist</Title>
+    <Container w={450} mx="auto">
+      <Title order={2}>Create new tasklist</Title>
 
-        <form onSubmit={form.onSubmit((values) => createTaskList(values))}>
-          <TextInput
-            sx={{ marginBottom: 8 }}
-            label="Name"
-            placeholder="Name"
-            {...form.getInputProps("name")}
-          />
-          <TextInput
-            label="Description"
-            placeholder="Description"
-            {...form.getInputProps("description")}
-          />
+      <form onSubmit={form.onSubmit((values) => createTaskList(values))}>
+        <TextInput
+          sx={{ marginBottom: 8 }}
+          label="Name"
+          placeholder="Name"
+          {...form.getInputProps("name")}
+        />
+        <TextInput
+          label="Description"
+          placeholder="Description"
+          {...form.getInputProps("description")}
+        />
 
-          <Group position="right" mt="md">
-            <Button type="submit">Submit</Button>
-          </Group>
-        </form>
-      </Container>
-    </Center>
+        <Group position="right" mt="md">
+          <Button type="submit">Submit</Button>
+        </Group>
+      </form>
+    </Container>
   );
 };
 

@@ -82,36 +82,34 @@ const Profile = ({}) => {
   }
 
   return (
-    <Center w="100vw" h="400px">
-      <Container w={450} mx="auto">
-        <Title order={2}>Update profile information</Title>
-        <Box maw={600} mx="auto">
-          <form onSubmit={form.onSubmit((values) => updateProfile(values))}>
-            <TextInput
-              sx={{ marginBottom: 8 }}
-              label="First name"
-              placeholder=""
-              {...form.getInputProps("firstName")}
-            />
-            <TextInput
-              sx={{ marginBottom: 8 }}
-              label="Last name"
-              placeholder=""
-              {...form.getInputProps("lastName")}
-            />
-            <TextInput
-              sx={{ marginBottom: 8 }}
-              label="Email"
-              placeholder=""
-              {...form.getInputProps("email")}
-            />
-            <Group position="right" mt="md">
-              <Button type="submit">Update</Button>
-            </Group>
-          </form>
-        </Box>
-      </Container>
-    </Center>
+    <Container w={450} mx="auto">
+      <Title order={2}>Update profile information</Title>
+      <Box maw={600} mx="auto">
+        <form onSubmit={form.onSubmit((values) => updateProfile(values))}>
+          <TextInput
+            sx={{ marginBottom: 8 }}
+            label="First name"
+            placeholder=""
+            {...form.getInputProps("firstName")}
+          />
+          <TextInput
+            sx={{ marginBottom: 8 }}
+            label="Last name"
+            placeholder=""
+            {...form.getInputProps("lastName")}
+          />
+          <TextInput
+            sx={{ marginBottom: 8 }}
+            label="Email"
+            placeholder=""
+            {...form.getInputProps("email")}
+          />
+          <Group position="right" mt="md">
+            <Button type="submit">Update</Button>
+          </Group>
+        </form>
+      </Box>
+    </Container>
   );
 };
 

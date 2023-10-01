@@ -8,13 +8,10 @@ export default async function ProfilePage() {
 
   if (session) {
     return (
-      <main className={styles.main}>
-        <div>
-          <Profile />
-        </div>
-      </main>
+      <div>
+        <Profile />
+      </div>
     );
   }
   return <h1 className="text-white">Access denied</h1>;
 }
-
