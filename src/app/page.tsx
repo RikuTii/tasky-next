@@ -24,6 +24,7 @@ import { Carousel } from "@mantine/carousel";
 import { useRouter } from "next/navigation";
 import { useRef } from "react";
 import { useMediaQuery } from "@mantine/hooks";
+import TaskActive from "./components/tasks/task-active";
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -43,12 +44,14 @@ export default function Home() {
 
   if (status === "authenticated") {
     return (
-      <Center>
-        <Container fluid>
-          <TasksUpcoming />
-          <TasksListing />
-        </Container>
-      </Center>
+      <>
+        <Center>
+          <Container fluid>
+            <TasksUpcoming />
+            <TasksListing />
+          </Container>
+        </Center>
+      </>
     );
   }
 
@@ -82,7 +85,11 @@ export default function Home() {
               p={50}
               h={400}
             >
-              <Image src={`/info/2${isMobile ? "_sm" : ""}.png`} height="350px" fit="scale-down"></Image>
+              <Image
+                src={`/info/2${isMobile ? "_sm" : ""}.png`}
+                height="350px"
+                fit="scale-down"
+              ></Image>
             </Flex>
           </Carousel.Slide>
           <Carousel.Slide>
@@ -93,11 +100,14 @@ export default function Home() {
               h={400}
               p={50}
             >
-              <Image src={`/info/3${isMobile ? "_sm" : ""}.png`} fit="scale-down"></Image>
+              <Image
+                src={`/info/3${isMobile ? "_sm" : ""}.png`}
+                fit="scale-down"
+              ></Image>
             </Flex>
           </Carousel.Slide>
           <Carousel.Slide>
-          <Flex
+            <Flex
               align={"center"}
               justify={"center"}
               sx={{ backgroundColor: "rgba(0,0,0,0.2)" }}

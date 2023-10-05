@@ -10,15 +10,30 @@ import {
   Title,
   Container,
   Center,
+  Flex,
+  Popover,
+  Text,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
+import { useClipboard } from "@mantine/hooks";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheck } from "@fortawesome/free-solid-svg-icons";
 
 interface TaskForm {
   name: string;
   description: string;
 }
-
+async function getClipboardContents() {
+  try {
+    const clipBoardText = await navigator.clipboard.readText();
+    return clipBoardText;
+  } catch (err) {
+    console.error(err);
+  }
+}
 const CreateTaskList = ({}) => {
+  const [taskData, setTaskData] = useState("");
+
   const form = useForm<TaskForm>({
     initialValues: { name: "", description: "" },
     validate: {
@@ -26,13 +41,20 @@ const CreateTaskList = ({}) => {
         value.length < 2 ? "Name must have at least 2 letters" : null,
     },
   });
+  const clipboard = useClipboard({ timeout: 500 });
 
   const createTaskList = async (values: TaskForm) => {
-    const res = await fetch("/api/fetch/tasklist/CreateTaskList", {
+    let endpoint = "/api/fetch/tasklist/CreateTaskList";
+    if (taskData.length > 0) {
+      endpoint = "/api/fetch/tasklist/CreateTaskListWithTasks";
+    }
+
+    const res = await fetch(endpoint, {
       method: "POST",
       body: JSON.stringify({
         Name: values.name,
         Description: values.description,
+        tasks: taskData.length > 0 ? taskData : undefined,
       }),
     });
     if (!res.ok) {
@@ -47,6 +69,13 @@ const CreateTaskList = ({}) => {
         message: values.name,
       });
       form.reset();
+    }
+  };
+
+  const loadTaskData = async () => {
+    const data = await getClipboardContents();
+    if (data && data.length) {
+      setTaskData(data);
     }
   };
 
@@ -66,9 +95,37 @@ const CreateTaskList = ({}) => {
           placeholder="Description"
           {...form.getInputProps("description")}
         />
-
         <Group position="right" mt="md">
-          <Button type="submit">Submit</Button>
+          <Flex gap="xs" align="center">
+            <Popover width={200} position="bottom" withArrow shadow="md">
+              <Popover.Target>
+                <Button variant="subtle" size="sm" radius={50}>
+                  ?
+                </Button>
+              </Popover.Target>
+              <Popover.Dropdown>
+                <Text size="xs">
+                  Load tasks for this tasklist from clipboard. Use ";" or "," or
+                  new lines to seperate each task
+                </Text>
+              </Popover.Dropdown>
+            </Popover>
+            <Button
+              variant="outline"
+              color={taskData ? "green" : undefined}
+              onClick={() => loadTaskData()}
+            >
+              <Flex gap="xs" align="center">
+                <Text>Load tasks from clipboard</Text>
+                {taskData && (
+                  <FontAwesomeIcon icon={faCheck} color="green" size="1x" />
+                )}
+              </Flex>
+            </Button>
+          </Flex>
+        </Group>
+        <Group position="right" mt="md">
+          <Button type="submit" variant="gradient">Submit</Button>
         </Group>
       </form>
     </Container>
