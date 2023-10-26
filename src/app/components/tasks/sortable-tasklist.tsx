@@ -69,7 +69,7 @@ const SortableTaskList = (props: {
     setDragCurrent(copyArray);
     activeDragIndex.current = 0;
     clear();
-  }
+  };
 
   const onTaskRemoved = () => {
     const task = props.tasks?.find((e) => e.id === taskToRemove.current);
@@ -178,13 +178,19 @@ const SortableTaskList = (props: {
       }),
     });
 
-    if (!res.ok) {
-      notifications.show({
-        title: "Error occured",
-        message: "Error removing task",
-        color: "red",
-      });
-    }
+    if(!res.ok && res.status === 404) {
+      if(props.tasklistId) {
+        props.refreshTaskLists(props.tasklistId);
+      }
+    } else {
+      if (!res.ok) {
+        notifications.show({
+          title: "Error occured",
+          message: "Error removing task",
+          color: "red",
+        });
+      }
+    }  
   };
 
   const reOrderTasks = async (orderedTasks: Task[]) => {
@@ -236,8 +242,12 @@ const SortableTaskList = (props: {
   };
 
   const renderSingleTask = (task: Task, index: number = 0) => {
-    if (autoFocusId.current === index && document.activeElement !== inputRef.current[index]) {
+    if (
+      autoFocusId.current === index &&
+      document.activeElement !== inputRef.current[index]
+    ) {
       inputRef.current[index].focus();
+      inputRef.current[index].setSelectionRange(0, 999);
     }
     const opacity = taskBeingRemoved === task.id ? "0.0" : "1.0";
     const transform = `translateX(${
@@ -256,7 +266,8 @@ const SortableTaskList = (props: {
           opacity: opacity,
           transformOrigin: "0% 0%",
           transform:
-            dragStart.current[index] > 0 && dragCurrent[index] > 0 || taskBeingRemoved === task.id 
+            (dragStart.current[index] > 0 && dragCurrent[index] > 0) ||
+            taskBeingRemoved === task.id
               ? transform
               : "",
           transition: "opacity 0.5s ease-in-out;",
@@ -267,6 +278,7 @@ const SortableTaskList = (props: {
 
         <TextInput
           w="100%"
+          enterKeyHint="enter"
           placeholder=""
           tabIndex={0}
           autoFocus={index === autoFocusId.current}

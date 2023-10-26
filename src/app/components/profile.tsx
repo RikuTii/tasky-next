@@ -82,7 +82,7 @@ const Profile = ({}) => {
   }
 
   return (
-    <Container w={450} mx="auto">
+    <Container fluid w={450} mx="auto">
       <Title order={2}>Update profile information</Title>
       <Box maw={600} mx="auto">
         <form onSubmit={form.onSubmit((values) => updateProfile(values))}>

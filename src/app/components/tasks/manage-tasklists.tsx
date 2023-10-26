@@ -166,7 +166,7 @@ const TaskLists = ({}) => {
 
   return (
     <Skeleton visible={loading}>
-      <Container size="md" p={rem(8)}>
+      <Container fluid size="md" p={rem(8)}>
         <Title order={2} mb={8}>
           Manage tasklists
         </Title>

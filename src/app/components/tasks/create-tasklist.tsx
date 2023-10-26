@@ -80,9 +80,8 @@ const CreateTaskList = ({}) => {
   };
 
   return (
-    <Container w={450} mx="auto">
+    <Container fluid w={450} mx="auto">
       <Title order={2}>Create new tasklist</Title>
-
       <form onSubmit={form.onSubmit((values) => createTaskList(values))}>
         <TextInput
           sx={{ marginBottom: 8 }}
@@ -105,7 +104,7 @@ const CreateTaskList = ({}) => {
               </Popover.Target>
               <Popover.Dropdown>
                 <Text size="xs">
-                  Load tasks for this tasklist from clipboard. Use ";" or "," or
+                  Load tasks for this tasklist from clipboard. Use &quot;;&quot; or &quot;,&quot; or
                   new lines to seperate each task
                 </Text>
               </Popover.Dropdown>
@@ -125,7 +124,9 @@ const CreateTaskList = ({}) => {
           </Flex>
         </Group>
         <Group position="right" mt="md">
-          <Button type="submit" variant="gradient">Submit</Button>
+          <Button type="submit" variant="gradient">
+            Submit
+          </Button>
         </Group>
       </form>
     </Container>
