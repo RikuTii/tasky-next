@@ -81,7 +81,7 @@ const SortableTaskList = (props: {
     const task_idx = props.tasks?.findIndex(
       (e) => e.id === taskToRemove.current
     );
-    if (task_idx) {
+    if (task_idx !== undefined && task_idx > -1) {
       copytask.splice(task_idx, 1);
       props.setTasks(copytask);
     }
