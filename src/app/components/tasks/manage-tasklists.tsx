@@ -36,10 +36,20 @@ const TaskLists = ({}) => {
   const { data: session, status } = useSession();
   const [tasklists, setTaskLists] = useState<Tasklist[] | null>(null);
   const [editList, setEditList] = useState<Tasklist | null>(null);
+  const [tasklistToDelete, setTasklistToDelete] = useState<Tasklist | null>(
+    null
+  );
   const [loading, setLoading] = useState(false);
   const [opened, { open, close }] = useDisclosure(false, {
     onClose: () => setShareEmail(""),
   });
+  const [
+    openedDeleteConfirm,
+    { open: openDeleteConfirm, close: closeDeleteConfirm },
+  ] = useDisclosure(false, {
+    onClose: () => setTasklistToDelete(null),
+  });
+
   const [shareEmail, setShareEmail] = useState<string>("");
 
   const loadTaskLists = async () => {
@@ -166,7 +176,7 @@ const TaskLists = ({}) => {
 
   return (
     <Skeleton visible={loading}>
-      <Container fluid size="md" p={rem(8)}>
+      <Container fluid mx="auto" p={rem(8)}>
         <Title order={2} mb={8}>
           Manage tasklists
         </Title>
@@ -229,7 +239,12 @@ const TaskLists = ({}) => {
                         alignContent: "center",
                         justifyContent: "center",
                       }}
-                      onClick={() => deleteTasklist(tasklist.id)}
+                      onClick={() => {
+                        if (tasklist) {
+                          setTasklistToDelete(tasklist);
+                          openDeleteConfirm();
+                        }
+                      }}
                     >
                       {tasklist.creator &&
                         tasklist.creator.id == session?.user?.id && (
@@ -357,6 +372,49 @@ const TaskLists = ({}) => {
                 </Group>
               </Grid.Col>
             </Grid>
+          </Box>
+        </Modal>
+        <Modal
+          opened={openedDeleteConfirm}
+          onClose={closeDeleteConfirm}
+          centered
+          title="Confirm delete"
+        >
+          <Box
+            sx={(theme) => ({
+              backgroundColor: theme.colors.dark[6],
+              padding: rem(8),
+            })}
+          >
+            <Box>
+              <Title order={4}>
+                Are you sure you want to delete this tasklist?
+              </Title>
+              <Text fw={700}>{tasklistToDelete?.name}</Text>
+              <Divider size="md" my="xs"></Divider>
+              <Flex gap={"lg"} justify={"space-between"} mx={20}>
+                <Button
+                  variant="filled"
+                  color="red"
+                  onClick={() => {
+                    if (tasklistToDelete) {
+                      deleteTasklist(tasklistToDelete.id);
+                    }
+                    closeDeleteConfirm();
+                  }}
+                >
+                  Delete
+                </Button>
+                <Button
+                  variant="light"
+                  onClick={() => {
+                    closeDeleteConfirm();
+                  }}
+                >
+                  Cancel
+                </Button>
+              </Flex>
+            </Box>
           </Box>
         </Modal>
       </Container>
