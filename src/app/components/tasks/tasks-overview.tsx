@@ -68,6 +68,7 @@ const TasksListing = ({}) => {
   const [loading, setLoading] = useState(true);
   const [loadingTaskList, setLoadingTasklist] = useState(true);
   const [initialLoad, setInitialLoad] = useState(true);
+  const [creationDisabled, setCreationDisabled] = useState(false);
   const [animateAddButon, setAnimateAddButton] = useState(false);
   const { start, clear } = useTimeout(() => setAnimateAddButton(false), 500);
   const { classes, cx } = useStyles();
@@ -163,6 +164,7 @@ const TasksListing = ({}) => {
   }, [currentTaskList?.id]);
 
   const createNewTask = async () => {
+    if(creationDisabled) return;
     let id = 1;
     if (tasks && tasks?.length > 0) {
       tasks.forEach((task: Task) => {
@@ -198,6 +200,7 @@ const TasksListing = ({}) => {
     orderId: number = 0,
     updateTasklist: boolean = false
   ) => {
+    setCreationDisabled(true);
     const res = await fetch("/api/fetch/task/CreateOrUpdateTask", {
       method: "POST",
       body: JSON.stringify({
@@ -226,6 +229,8 @@ const TasksListing = ({}) => {
         const newTasks = [...(tasks ?? []), updatedTask];
         setTasks(newTasks);
       }
+
+    setCreationDisabled(false);
 
       if (updateTasklist) {
         setLoadingTasklist(true);

@@ -166,7 +166,7 @@ const SortableTaskList = (props: {
   }, [props.tasks]);
 
   const delayedTaskUpdate = useCallback(
-    debounce((q: Task) => props.onTaskUpdated(q, 0, false), 1000),
+    debounce((q: Task) => props.onTaskUpdated(q, 0, false), 300),
     []
   );
   const removeTask = async (task: Task) => {
@@ -178,8 +178,8 @@ const SortableTaskList = (props: {
       }),
     });
 
-    if(!res.ok && res.status === 404) {
-      if(props.tasklistId) {
+    if (!res.ok && res.status === 404) {
+      if (props.tasklistId) {
         props.refreshTaskLists(props.tasklistId);
       }
     } else {
@@ -190,7 +190,7 @@ const SortableTaskList = (props: {
           color: "red",
         });
       }
-    }  
+    }
   };
 
   const reOrderTasks = async (orderedTasks: Task[]) => {
@@ -278,7 +278,7 @@ const SortableTaskList = (props: {
 
         <TextInput
           w="100%"
-          enterKeyHint="enter"
+          enterKeyHint="done"
           placeholder=""
           tabIndex={0}
           autoFocus={index === autoFocusId.current}
@@ -297,9 +297,9 @@ const SortableTaskList = (props: {
               e.stopPropagation();
             }
           }}
-          ref={(element: HTMLInputElement) =>
-            (inputRef.current[index] = element)
-          }
+          ref={(element) => {
+            if (element) inputRef.current[index] = element;
+          }}
           onKeyUp={(e) => {
             if (e.code === "Enter") {
               props.createNewTask();

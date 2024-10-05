@@ -174,13 +174,12 @@ const TaskGeneral = (props: {
         placeholder="Pick date and time"
         size="sm"
         dropdownType="modal"
-        mx="auto"
-      />
+        mx="auto" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} />
 
       {showFileInput && (
         <FileInput
           label="Upload attachments"
-          placeholder="Select files"
+          aria-placeholder="Select files"
           accept="image/png,image/jpeg,image/gif,application/json,application/pdf,text/plain"
           multiple
           value={props.attachments}
