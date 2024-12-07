@@ -14,6 +14,7 @@ import {
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { useDisclosure } from "@mantine/hooks";
+import { useStyles } from "./tasks/sortable-tasklist";
 
 interface ProfileForm {
   firstName: string;
@@ -38,6 +39,7 @@ const Profile = ({}) => {
         value.length < 2 ? "Name must have at least 2 letters" : null,
     },
   });
+  const { classes } = useStyles();
 
   useEffect(() => {
     loadProfile();
@@ -90,18 +92,21 @@ const Profile = ({}) => {
             sx={{ marginBottom: 8 }}
             label="First name"
             placeholder=""
+            classNames={{input: classes.defaultInput}}
             {...form.getInputProps("firstName")}
           />
           <TextInput
             sx={{ marginBottom: 8 }}
             label="Last name"
             placeholder=""
+            classNames={{input: classes.defaultInput}}
             {...form.getInputProps("lastName")}
           />
           <TextInput
             sx={{ marginBottom: 8 }}
             label="Email"
             placeholder=""
+            classNames={{input: classes.defaultInput}}
             {...form.getInputProps("email")}
           />
           <Group position="right" mt="md">

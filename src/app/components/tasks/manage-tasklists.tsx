@@ -31,6 +31,7 @@ import {
 import { notifications } from "@mantine/notifications";
 import { useDisclosure } from "@mantine/hooks";
 import { formatDate } from "@/helpers/timedateformat";
+import { useStyles } from "./sortable-tasklist";
 
 const TaskLists = ({}) => {
   const { data: session, status } = useSession();
@@ -39,6 +40,8 @@ const TaskLists = ({}) => {
   const [tasklistToDelete, setTasklistToDelete] = useState<Tasklist | null>(
     null
   );
+  const { classes } = useStyles();
+
   const [loading, setLoading] = useState(false);
   const [opened, { open, close }] = useDisclosure(false, {
     onClose: () => setShareEmail(""),
@@ -275,6 +278,7 @@ const TaskLists = ({}) => {
 
               <TextInput
                 placeholder=""
+                classNames={{input: classes.defaultInput}}
                 label="Name"
                 value={editList?.name}
                 onChange={(event) => {
@@ -335,6 +339,7 @@ const TaskLists = ({}) => {
                 <Text>Email</Text>
                 <TextInput
                   type="email"
+                  classNames={{input: classes.defaultInput}}
                   autoCorrect=""
                   autoCapitalize="none"
                   autoComplete="none"

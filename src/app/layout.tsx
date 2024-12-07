@@ -32,6 +32,9 @@ export const metadata: Metadata = {
     title: APP_DEFAULT_TITLE,
      startupImage: "/icons/logo-512.png",
   },
+  other: {
+    "mobile-web-app-capable": "yes"
+  },
   formatDetection: {
     telephone: false,
   },

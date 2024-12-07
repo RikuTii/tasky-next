@@ -13,6 +13,7 @@ import {
   Center,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
+import { useStyles } from "@/components/tasks/sortable-tasklist";
 
 interface Registerform {
   username: string;
@@ -23,6 +24,7 @@ interface Registerform {
 const RegisterPage = () => {
   const router = useRouter();
   const [loading, { toggle }] = useDisclosure();
+  const { classes } = useStyles();
 
   const form = useForm<Registerform>({
     initialValues: { username: "", email: "", password: "" },
@@ -78,6 +80,7 @@ const RegisterPage = () => {
         <form onSubmit={form.onSubmit((values) => onSubmit(values))}>
           <TextInput
             sx={{ marginBottom: 8 }}
+            classNames={{input: classes.defaultInput}}
             label="Username"
             placeholder="Username"
             autoCorrect=""
@@ -89,6 +92,7 @@ const RegisterPage = () => {
           <TextInput
             sx={{ marginBottom: 8 }}
             label="Email"
+            classNames={{input: classes.defaultInput}}
             placeholder="Email"
             autoCorrect=""
             autoCapitalize="none"

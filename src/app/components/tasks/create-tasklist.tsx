@@ -18,6 +18,7 @@ import { notifications } from "@mantine/notifications";
 import { useClipboard } from "@mantine/hooks";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
+import { useStyles } from "./sortable-tasklist";
 
 interface TaskForm {
   name: string;
@@ -33,7 +34,7 @@ async function getClipboardContents() {
 }
 const CreateTaskList = ({}) => {
   const [taskData, setTaskData] = useState("");
-
+  const { classes } = useStyles();
   const form = useForm<TaskForm>({
     initialValues: { name: "", description: "" },
     validate: {
@@ -85,12 +86,14 @@ const CreateTaskList = ({}) => {
       <form onSubmit={form.onSubmit((values) => createTaskList(values))}>
         <TextInput
           sx={{ marginBottom: 8 }}
+          classNames={{input: classes.defaultInput}}
           label="Name"
           placeholder="Name"
           {...form.getInputProps("name")}
         />
         <TextInput
           label="Description"
+          classNames={{input: classes.defaultInput}}
           placeholder="Description"
           {...form.getInputProps("description")}
         />

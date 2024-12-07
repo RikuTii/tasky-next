@@ -11,6 +11,7 @@ import {
   Divider,
 } from "@mantine/core";
 import { useEffect, useState } from "react";
+import { useStyles } from "./sortable-tasklist";
 const parseTimeInput = (oldinput: string, input: string) => {
   return input.match("^[0-9mhwds ]*$")?.join("") ?? oldinput;
 };
@@ -57,6 +58,7 @@ const TimeTrack = (props: {
   const [trackTime, setTrackTime] = useState<string>("");
   const [estimateTime, setEstimateTime] = useState<string>("");
   const [timeProgress, setTimeProgress] = useState<number>(0);
+  const { classes } = useStyles();
   useEffect(() => {
     if (props.task?.timeEstimate) {
       const prog = Math.min(
@@ -152,6 +154,7 @@ const TimeTrack = (props: {
           <Tooltip label="Format: 1h 20m 15s">
             <TextInput
               placeholder="Estimated duration"
+              classNames={{input: classes.defaultInput}}
               label="Estimated duration"
               value={estimateTime}
               onChange={(e) =>
@@ -168,6 +171,7 @@ const TimeTrack = (props: {
               <TextInput
                 placeholder="Add time"
                 label="Add time"
+                classNames={{input: classes.defaultInput}}
                 value={trackTime}
                 onChange={(e) =>
                   setTrackTime(parseTimeInput(trackTime ?? "", e.target.value))

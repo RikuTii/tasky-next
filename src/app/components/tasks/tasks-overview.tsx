@@ -56,6 +56,9 @@ const useStyles = createStyles((theme) => ({
     position: "absolute",
     backgroundColor: "white",
   },
+  defaultInput: {
+    fontSize: "1rem"
+  },
 }));
 
 const TasksListing = ({}) => {
@@ -83,6 +86,26 @@ const TasksListing = ({}) => {
     setLoading(true);
     loadTaskLists();
   }, []);
+
+
+  useEffect(() => {
+    const ids: number[] = [];
+    let hasDuplicate = false;
+    tasks?.forEach((t) => {
+      if(t && t.id) {
+        const index = ids.indexOf(t.id);
+        if(index > -1) {
+          hasDuplicate = true;
+        } else {
+          ids.push(t.id);
+        }
+      }  
+    });
+
+    if(hasDuplicate && currentTaskList && currentTaskList.id) {
+      refreshTaskList(currentTaskList.id);
+    }
+  }, [tasks]);
 
   const loadTaskLists = async () => {
     const response = await fetch("/api/fetch/tasklist/Index");
@@ -311,6 +334,10 @@ const TasksListing = ({}) => {
                     <Select
                       style={{ marginBottom: 8 }}
                       value={String(currentTaskList?.id)}
+                      classNames={{
+                        input: classes.defaultInput,
+                        item: classes.defaultInput
+                      }}
                       data={
                         taskLists?.map((tasklist: Tasklist) => ({
                           value: String(tasklist.id),

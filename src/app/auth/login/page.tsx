@@ -14,6 +14,7 @@ import {
   Center,
   Container,
 } from "@mantine/core";
+import { useStyles } from "@/components/tasks/sortable-tasklist";
 
 interface LoginForm {
   username: string;
@@ -24,6 +25,9 @@ const LoginPage = () => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const os = useOs();
+
+  const { classes } = useStyles();
+
 
   const form = useForm<LoginForm>({
     initialValues: { username: "", password: "" },
@@ -71,6 +75,7 @@ const LoginPage = () => {
         <form onSubmit={form.onSubmit((values) => onSubmit(values))}>
           <TextInput
             sx={{ marginBottom: 8 }}
+            classNames={{input: classes.defaultInput}}
             label="Username/email"
             placeholder="Username or email"
             required={true}

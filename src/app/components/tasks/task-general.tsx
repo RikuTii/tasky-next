@@ -61,6 +61,9 @@ const useStyles = createStyles((theme) => ({
     overflow: "hidden",
     whiteSpace: "nowrap",
   },
+  defaultInput: {
+    fontSize: "1rem"
+  },
 }));
 
 const TaskGeneral = (props: {
@@ -148,6 +151,7 @@ const TaskGeneral = (props: {
       <TextInput
         placeholder=""
         label="Name"
+        classNames={{input: classes.defaultInput}}
         value={props.task.title}
         onChange={(event) => {
           const newTask = { ...props.task, title: event.target.value };

@@ -19,9 +19,13 @@ import {
 import { debounce } from "lodash";
 import { notifications } from "@mantine/notifications";
 
-const useStyles = createStyles((theme) => ({
+export const useStyles = createStyles((theme) => ({
   input: {
     backgroundColor: theme.colors.dark[8],
+    fontSize: "1rem"
+  },
+  defaultInput: {
+    fontSize: "1rem"
   },
 }));
 
@@ -255,7 +259,7 @@ const SortableTaskList = (props: {
     }px)`;
     return (
       <Flex
-        key={task.id}
+        key={`${task.id}_${task.createdDate}`}
         direction="row"
         w="100%"
         gap="md"
@@ -283,7 +287,7 @@ const SortableTaskList = (props: {
           tabIndex={0}
           autoFocus={index === autoFocusId.current}
           classNames={{
-            input: task.status === TaskStatus.Done ? classes.input : "",
+            input: task.status === TaskStatus.Done ? classes.input : classes.defaultInput,
           }}
           sx={{
             textDecorationLine:
@@ -301,7 +305,7 @@ const SortableTaskList = (props: {
             if (element) inputRef.current[index] = element;
           }}
           onKeyUp={(e) => {
-            if (e.code === "Enter") {
+            if (e.code === "Enter" || e.key === "Enter") {
               props.createNewTask();
             }
           }}
